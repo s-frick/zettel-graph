@@ -12,22 +12,41 @@ function escapeHtml(str = '') {
     .replace(/'/g, '&#39;');
 }
 
+function safe(str, fallback = '') {
+  return (str == null) ? fallback : String(str);
+}
+function stripFrontmatter(markdown = '') {
+  return markdown.replace(/^---[\s\S]*?\n---\s*/m, '');
+}
+function stripLeadingH1(md = '') {
+  return md.replace(/^#\s+.*\n+/, '').replace(/^\s+/, '');
+}
 function buildPreviewHtml(node) {
   const title = node.title || node.id;
   const tags = Array.isArray(node.tags) ? node.tags : [];
   const tagLine = tags.length ? tags.map(t => `#${t}`).join(' ') : '';
 
-  const src = node.raw || node.summary || '';
-  const maxChars = 400;
-  let excerpt = src.slice(0, maxChars).trim();
-  if (src.length > maxChars) {
-    excerpt += '\n…';
+  // Quelle: raw oder summary
+  const markdownSrc = node.raw || node.summary || '';
+
+  // Frontmatter rausfiltern
+  let md = stripFrontmatter(markdownSrc);
+  md = stripLeadingH1(md);
+
+  // optional: Kürzen fürs Preview
+  const maxChars = 1200;
+  if (md.length > maxChars) {
+    md = md.slice(0, maxChars) + '\n\n…';
   }
 
+  // Markdown → HTML
+  const rendered = marked.parse(md);
+
   return `
-    <div class="node-preview-title">${escapeHtml(title)}</div>
-    <div class="node-preview-tags">${escapeHtml(tagLine)}</div>
-    <div class="node-preview-body">${escapeHtml(excerpt)}</div>
+    <div class="node-preview-title">${title}</div>
+    <div class="node-preview-tags">${tagLine}</div>
+    <div class="node-preview-divider" />
+    <div class="node-preview-body">${rendered}</div>
   `;
 }
 
