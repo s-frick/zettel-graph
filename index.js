@@ -1,7 +1,14 @@
+let previewsize = 240;
 // Preview-Element einmalig anlegen
 const nodePreview = document.createElement('div');
 nodePreview.className = 'node-preview';
 document.body.appendChild(nodePreview);
+
+// Detail-Element (Klick) einmalig anlegen
+const nodeDetail = document.createElement('div');
+nodeDetail.className = 'node-detail';
+nodeDetail.opacity = 0;
+document.body.appendChild(nodeDetail);
 
 function escapeHtml(str = '') {
   return String(str)
@@ -34,7 +41,7 @@ function buildPreviewHtml(node) {
   md = stripLeadingH1(md);
 
   // optional: Kürzen fürs Preview
-  const maxChars = 1200;
+  const maxChars = previewsize;
   if (md.length > maxChars) {
     md = md.slice(0, maxChars) + '\n\n…';
   }
@@ -70,9 +77,60 @@ document.getElementById('3d-graph').addEventListener('mousemove', e => {
   nodePreview.style.right = ''; // rechte Position deaktivieren
 });
 
+// ---------- Detail-Panel (Klick) ----------
+
+function buildDetailHtml(node) {
+  const title = node.title || node.id;
+  const tags  = Array.isArray(node.tags) ? node.tags : [];
+  const tagLine = tags.length ? tags.map(t => `#${t}`).join(' ') : '';
+
+  let md = node.raw || node.summary || '';
+
+  md = stripFrontmatter(md);
+  md = stripLeadingH1(md);
+
+  // hier kein oder weniger aggressives Kürzen, ist ja "Full View"
+  const maxChars = 8000;
+  if (md.length > maxChars) {
+    md = md.slice(0, maxChars) + '\n\n…';
+  }
+
+  const rendered = marked.parse(md);
+
+  return `
+    <div class="node-detail-title">${title}</div>
+    <div class="node-detail-tags">${tagLine}</div>
+    <hr class="node-detail-divider" />
+    <div class="node-detail-body">${rendered}</div>
+  `;
+}
+
+function openDetailPanel(node) {
+  previewsize = 120;
+  nodeDetail.innerHTML = buildDetailHtml(node);
+  nodeDetail.classList.add('open');
+}
+
+function closeDetailPanel() {
+  previewsize = 240;
+  nodeDetail.classList.remove('open');
+  nodeDetail.innerHTML = '';
+}
+
+function handleNodeClick(node, event) {
+  console.log('click', node)
+  if (!node) return;
+
+  openDetailPanel(node);
+  // Falls du das Panel per CSS initial versteckst, könntest du hier z.B.:
+  // nodeDetail.style.display = 'block';
+}
+
+
 const Graph = new ForceGraph3D(document.getElementById('3d-graph'))
     .jsonUrl('./graph.json')
     .nodeLabel('title')
     .nodeAutoColorBy('tags')
     .onNodeHover(handleNodeHover)
+    .onNodeClick(handleNodeClick)
 ;

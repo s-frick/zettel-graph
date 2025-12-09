@@ -62,3 +62,99 @@
   border-top: 1px solid rgba(255, 255, 255, 0.25);
   margin: 0.35rem 0 0.5rem;
 }
+
+/* Fester Detailbereich rechts */
+.node-detail {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 32rem;
+  max-width: 40vw;
+  height: 100vh;
+  overflow: auto;
+  padding: 1rem 1.25rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+
+  background: rgba(10, 10, 10, 0.95);
+  color: #f8f8f8;
+  backdrop-filter: blur(8px);
+
+  font-family: system-ui, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+  z-index: 9998;
+
+  /* ---- hidden by default ---- */
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+/* Sichtbar-Zustand */
+.node-detail.open {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Optional: Graph nicht unter das Panel schieben,
+   wenn du das per Layout löst, kannst du das weglassen */
+#3d-graph {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 32rem; /* gleiche Breite wie .node-detail */
+  bottom: 0;
+}
+
+/* Detail-Inhalt */
+.node-detail-title {
+  font-weight: 650;
+  font-size: 1.1rem;
+  margin-bottom: 0.35rem;
+}
+
+.node-detail-tags {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  margin-bottom: 0.6rem;
+}
+
+.node-detail-divider {
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  margin: 0.4rem 0 0.75rem;
+}
+
+.node-detail-body {
+  white-space: normal;
+}
+
+/* Markdown etwas hübscher */
+.node-detail-body h1,
+.node-detail-body h2,
+.node-detail-body h3 {
+  font-size: 1rem;
+  margin: 0.7rem 0 0.35rem;
+}
+
+.node-detail-body p {
+  margin: 0.3rem 0 0.5rem;
+}
+
+.node-detail-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.82rem;
+}
+
+.node-detail-body pre {
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.4rem;
+  background: rgba(255, 255, 255, 0.06);
+  overflow-x: auto;
+  margin: 0.5rem 0 0.7rem;
+}
