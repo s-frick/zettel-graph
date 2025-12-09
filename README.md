@@ -1,9 +1,7 @@
 # Zettelgraph
 
 
-https://github.com/user-attachments/assets/31a494ef-3917-4809-ae45-7f46ca2d1313
-
-
+https://github.com/user-attachments/assets/08ea4ab3-85b7-475e-9e07-4cd586a56045
 
 
 ## Run it
