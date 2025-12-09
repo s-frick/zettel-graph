@@ -1,5 +1,12 @@
 # Zettelgraph
 
+
+https://github.com/user-attachments/assets/31a494ef-3917-4809-ae45-7f46ca2d1313
+
+
+
+
+## Run it
 Convert zettel to graph
 ```bash
 ./convert.js markdown/*.md \
