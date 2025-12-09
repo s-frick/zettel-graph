@@ -1,0 +1,265 @@
+{
+  "nodes": [
+    {
+      "id": "20251209-231000",
+      "title": "Common Lisp – Zettelkasten Index",
+      "summary": "Dieses Index-File sammelt alle bisherigen Common-Lisp-Zettel und ordnet sie thematisch.",
+      "tags": [
+        "commonlisp",
+        "index"
+      ],
+      "group": "commonlisp",
+      "size": 5,
+      "file": "markdown/20251209-001700_clisp.md",
+      "refs": [
+        {
+          "text": "Property Lists (Plists)",
+          "href": "./20251209-001800_property-lists-clisp.md",
+          "file": "20251209-001800_property-lists-clisp.md",
+          "targetId": "20251209-001800"
+        },
+        {
+          "text": "`defvar` und globale dynamische Variablen",
+          "href": "./20251209-085400_defvar-clisp.md",
+          "file": "20251209-085400_defvar-clisp.md",
+          "targetId": "20251209-085400"
+        },
+        {
+          "text": "`push` und Listenmutation",
+          "href": "./20251209-085500_push-list-clisp.md",
+          "file": "20251209-085500_push-list-clisp.md",
+          "targetId": "20251209-085500"
+        },
+        {
+          "text": "`dolist` – Listeniteration",
+          "href": "./20251209-085900_dolist-clisp.md",
+          "file": "20251209-085900_dolist-clisp.md",
+          "targetId": "20251209-085900"
+        },
+        {
+          "text": "`format` mit ~{ ... ~} und Listenformatierung",
+          "href": "./20251209-090400_format-lists.clisp.md",
+          "file": "20251209-090400_format-lists.clisp.md",
+          "targetId": "20251209-090400"
+        },
+        {
+          "text": "`with-open-file` und Datei-IO",
+          "href": "./20251209-091202_with-open-file-clisp.md",
+          "file": "20251209-091202_with-open-file-clisp.md",
+          "targetId": "20251209-091202"
+        },
+        {
+          "text": "`lambda`, `#'` und Funktionsobjekte",
+          "href": "./20251209-091200_higher-order-fn.clisp.md",
+          "file": "20251209-091200_higher-order-fn.clisp.md",
+          "targetId": "20251209-091200"
+        },
+        {
+          "text": "Keyword-Parameter (`&key`)",
+          "href": "./20251209-091500_keyword-param-clisp.md",
+          "file": "20251209-091500_keyword-param-clisp.md",
+          "targetId": "20251209-091500"
+        }
+      ],
+      "raw": "---\nID: 20251209-231000\nTAGS: commonlisp, index\n---\n# Common Lisp – Zettelkasten Index\n\nDieses Index-File sammelt alle bisherigen Common-Lisp-Zettel und ordnet sie thematisch.\n\n- Datenstrukturen\n  - [Property Lists (Plists)](./20251209-001800_property-lists-clisp.md)\n- Variablen & Zustand\n  - [`defvar` und globale dynamische Variablen](./20251209-085400_defvar-clisp.md)\n  - [`push` und Listenmutation](./20251209-085500_push-list-clisp.md)\n- Iteration & Kontrolle\n  - [`dolist` – Listeniteration](./20251209-085900_dolist-clisp.md)\n- Ein-/Ausgabe & Formatierung\n  - [`format` mit ~{ ... ~} und Listenformatierung](./20251209-090400_format-lists.clisp.md)\n  - [`with-open-file` und Datei-IO](./20251209-091202_with-open-file-clisp.md)\n- Funktionen & Higher-Order-Programmierung\n  - [`lambda`, `#'` und Funktionsobjekte](./20251209-091200_higher-order-fn.clisp.md)\n  - [Keyword-Parameter (`&key`)](./20251209-091500_keyword-param-clisp.md)\n"
+    },
+    {
+      "id": "20251209-001800",
+      "title": "Property Lists (Plists) in Common Lisp",
+      "summary": "",
+      "tags": [
+        "commonlisp",
+        "plist"
+      ],
+      "group": "commonlisp",
+      "size": 5,
+      "file": "markdown/20251209-001800_property-lists-clisp.md",
+      "refs": [],
+      "raw": "---\nID: 20251209-001800\nTAGS: commonlisp, plist\n---\n# Property Lists (Plists) in Common Lisp\n\n## Konzept\n\nEine Property List (plist) ist eine einfache Liste aus Schlüssel–Wert-Paaren, meist mit Keywords.\n\n## Beispiel\n\n```lisp\n(list :a 1 :b 2 :c 3)\n;; => (:A 1 :B 2 :C 3)\n```\n\n## Zugriff\n\n```lisp\n(getf (list :a 1 :b 2 :c 3) :c)\n;; => 3\n```\n\n## Merkpunkte\n\n- Plists bestehen aus alternierenden Keys und Values.\n- Zugriff erfolgt über `getf`.\n- Flexibel und dynamisch, aber ohne Typsicherheit.\n"
+    },
+    {
+      "id": "20251209-085400",
+      "title": "`defvar` - globale dynamische Variable",
+      "summary": "",
+      "tags": [
+        "commonlisp",
+        "variables",
+        "dynamic-scope"
+      ],
+      "group": "commonlisp",
+      "size": 5,
+      "file": "markdown/20251209-085400_defvar-clisp.md",
+      "refs": [],
+      "raw": "---\nID: 20251209-085400\nTAGS: commonlisp, variables, dynamic-scope\n---\n\n# `defvar` - globale dynamische Variable\n\n## Konzept\n\n`defvar` definiert eine *dynamische* globale Variable, die nur initialisiert wird, wenn sie zuvor ungebunden war.\n\n## Beispiel\n```lisp\n(defvar *db* nil)\n```\n\n## Verhalten\n- definiert eine global sichtbare Variable\n- dynamisch gebunden (nicht lexikalisch!)\n- erneutes `defvar` überschreibt den Wert nicht\n\n## Merkpunkte\n- dynamischer SCope ist ein wichtiges Konzept in COmmon Lisp\n- Globale Variablen werden traditionell (Konvention) mit Sternchen benannt: `*variable*`\n"
+    },
+    {
+      "id": "20251209-085500",
+      "title": "`push` - Einfügen an den Anfang einer Liste",
+      "summary": "",
+      "tags": [
+        "commonlisp",
+        "lists",
+        "mutation"
+      ],
+      "group": "commonlisp",
+      "size": 5,
+      "file": "markdown/20251209-085500_push-list-clisp.md",
+      "refs": [],
+      "raw": "---\nID: 20251209-085500\nTAGS: commonlisp, lists, mutation\n---\n\n# `push` - Einfügen an den Anfang einer Liste\n\n## Konzept\n`push` fügt einen Weret an den Anfang einer LIste ein und modifiziert die BIndung einer Variable.\n\n## Beispiel\n\n```lisp\n(defvar *items* nil)\n(push 10 *items*)\n(push 20 *items*)\n*items*\n;; => (20 10)\n```\n## Funktionsweise\n`push` entspricht:\n\n```lisp\n(setf *items* (cons 20 *items*))\n```\n\n## Merkpunkte\n- mutiert die gebundene Variable\n- fügt immer vorne ein (Stack-artiges Verhalten)\n- funktioniert nur mit Variablen, nicht mit Ausdrücken\n"
+    },
+    {
+      "id": "20251209-085900",
+      "title": "`dolist` - Listeniteration",
+      "summary": "",
+      "tags": [
+        "commonlisp",
+        "lists",
+        "iteration"
+      ],
+      "group": "commonlisp",
+      "size": 5,
+      "file": "markdown/20251209-085900_dolist-clisp.md",
+      "refs": [],
+      "raw": "---\nID: 20251209-085900\nTAGS: commonlisp, lists, iteration\n---\n\n# `dolist` - Listeniteration\n\n## Konzept\n\n`dolist` iteriert nacheinander über die Elemente einer Liste und führt einen Block Code darauf aus.\n\n## Beispiel\n\n```lisp\n(dolist (x '(1 2 3))\n    (format t \"~a \" x))\n;; Ausgabe: 1 2 3\n```\n\n## Rückgabewert\n\n`dolist` gibt standardmäßig `nil` zurueck,\n es sei denn, ein alternativer Rückgabewert wird angegeben:\n\n```lisp\n(dolist (x '(1 2 3) 'done)\n    (print x))\n;; => DONE\n```\n\n## Merkpunkte\n\n- einfache Listeniteration\n- Bindet die SChleifenvariable nacheinander an jedes Element\n- optionaler Return-Wert moeglich\n"
+    },
+    {
+      "id": "20251209-090400",
+      "title": "markdown/20251209-090400_format-lists.clisp.md",
+      "summary": "",
+      "tags": [
+        "commonlisp",
+        "formatting",
+        "io"
+      ],
+      "group": "commonlisp",
+      "size": 5,
+      "file": "markdown/20251209-090400_format-lists.clisp.md",
+      "refs": [],
+      "raw": "---\nID: 20251209-090400\nTAGS: commonlisp, formatting, io\n---\n\n## Konzept\n`~{ ... ~}` iteriert automatisch ueber eien Sequenz und formatiert jedes Element gemaess dem enthaltenen Formatstring.\n\n```lisp\n(format t \"~{~a ~}\" '(1 2 3))\n;; Ausgabe: 1 2 3\n```\n\n## Anwendung auf Key/Value-Paare\n\n```lisp\n(format t \"~{~a: ~a~%~}\" '(:title \"Kind of Blue\" :artist \"Miles Davis\"))\n;; Ausgabe:\n;; TITLE: Kind of Blue\n;; ARTIST: Miles Davis\n```\n\n## Merkpunkte\n- wiederholt  das Format fuer jedes Element bzw. Elementpaar\n- sehr maechtig fuer strukturierte Ausgaben\n- funktioniert auf allen Sequenzen\n"
+    },
+    {
+      "id": "20251209-091200",
+      "title": "Funktionsobjekte: `lambda`, `#'`, Higher-Order Functions",
+      "summary": "",
+      "tags": [
+        "commonlisp",
+        "functions",
+        "higherorder"
+      ],
+      "group": "commonlisp",
+      "size": 5,
+      "file": "markdown/20251209-091200_higher-order-fn.clisp.md",
+      "refs": [
+        {
+          "text": "Keyword-Parameter (`&key`)",
+          "href": "./20251209-091200_higher-order-fn.clisp.md",
+          "file": "20251209-091200_higher-order-fn.clisp.md",
+          "targetId": "20251209-091200"
+        }
+      ],
+      "raw": "---\nID: 20251209-091200\nTAGS: commonlisp, functions, higherorder\n---\n# Funktionsobjekte: `lambda`, `#'`, Higher-Order Functions\n\n## Konzept\n\nLisp behandelt Funktionen als First-Class-Objekte; sie können erzeugt, gespeichert und übergeben werden.\n\n## Beispiel: Lambda-Ausdruck\n\n```lisp\n(mapcar #'(lambda (x) (* x x))\n        '(1 2 3))\n;; => (1 4 9)\n```\n\n## Bedeutung von `#'`\n\n`#'` ist `(function …)` und dient der Funktionsquote:\n\n```lisp\n#'(lambda (x) x)\n;; ist äquivalent zu\n(function (lambda (x) x))\n```\n\n## Closure-Beispiel\n\n```lisp\n(defun make-adder (n)\n  #'(lambda (x) (+ x n)))\n\n(funcall (make-adder 10) 5)\n;; => 15\n```\n\n## Merkpunkte\n\n- Funktionen sind erstklassige Werte  \n- Lambdas erzeugen anonyme Funktionen  \n- Closures „merken“ sich ihre Umgebung  \n- `mapcar`, `remove-if`, `sort` usw. nutzen Functions als Argumente\n\n## Siehe auch\n\n- [Keyword-Parameter (`&key`)](./20251209-091200_higher-order-fn.clisp.md)\n\n"
+    },
+    {
+      "id": "20251209-091202",
+      "title": "`with-open-file` – Dateien lesen und schreiben",
+      "summary": "",
+      "tags": [
+        "commonlisp",
+        "io",
+        "file"
+      ],
+      "group": "commonlisp",
+      "size": 5,
+      "file": "markdown/20251209-091202_with-open-file-clisp.md",
+      "refs": [
+        {
+          "text": "`Property Lists (Plists)`",
+          "href": "./20251209-001800_property-lists-clisp.md",
+          "file": "20251209-001800_property-lists-clisp.md",
+          "targetId": "20251209-001800"
+        },
+        {
+          "text": "`defvar` – globale dynamische Variablen",
+          "href": "./20251209-085400_defvar-clisp.md",
+          "file": "20251209-085400_defvar-clisp.md",
+          "targetId": "20251209-085400"
+        }
+      ],
+      "raw": "---\nID: 20251209-091202\nTAGS: commonlisp, io, file\n---\n# `with-open-file` – Dateien lesen und schreiben\n\n## Konzept\n\n`with-open-file` öffnet eine Datei und schließt sie nach Ende des Blocks automatisch.\n\n## Beispiel: Speichern eines Lisp-Objekts\n\n```lisp\n(with-open-file (out \"data.lisp\" :direction :output :if-exists :supersede)\n  (print '(:a 1 :b 2) out))\n```\n\n## Laden\n\n```lisp\n(with-open-file (in \"data.lisp\" :direction :input)\n  (read in))\n;; => (:A 1 :B 2)\n```\n\n## `with-standard-io-syntax`\n```lisp\n(with-open-file (in filename)\n  (with-standard-io-syntax\n    (setf *db* (read in))))\n```\n\n## Merkpunkte\n\n- `print` und `read` erzeugen Lisp-lesbares Format  \n- `with-standard-io-syntax` vermeidet Kompatibilitätsprobleme  \n- automatische Ressourcenschließung\n\n## Siehe auch\n\n- [`Property Lists (Plists)`](./20251209-001800_property-lists-clisp.md)\n- [`defvar` – globale dynamische Variablen](./20251209-085400_defvar-clisp.md)\n"
+    },
+    {
+      "id": "20251209-091500",
+      "title": "Keyword-Parameter (`&key`)",
+      "summary": "",
+      "tags": [
+        "commonlisp",
+        "functions",
+        "keyword-parameters",
+        "defaults",
+        "supplied"
+      ],
+      "group": "commonlisp",
+      "size": 5,
+      "file": "markdown/20251209-091500_keyword-param-clisp.md",
+      "refs": [
+        {
+          "text": "`lambda`, `#'` und Funktionsobjekte",
+          "href": "./20251209-091200_higher-order-fn.clisp.md",
+          "file": "20251209-091200_higher-order-fn.clisp.md",
+          "targetId": "20251209-091200"
+        }
+      ],
+      "raw": "---\nID: 20251209-091500\nTAGS: commonlisp, functions, keyword-parameters, defaults, supplied\n---\n# Keyword-Parameter (`&key`)\n\n## Konzept\n\nKeyword-Parameter erlauben benannte, optionale Argumente mit Default-Werten.\n\n## Beispiel\n\n```lisp\n(defun foo (&key a (b 20) (c 30 c-supplied-p))\n  (list a b c c-supplied-p))\n```\n\n## Aufrufe\n\n```lisp\n(foo :a 1 :c 5)\n;; => (1 20 5 T)\n\n(foo)\n;; => (NIL 20 30 NIL)\n```\n\n## Merkpunkte\n\n- Reihenfolge egal  \n- Default-Werte möglich  \n- `supplied-p` zeigt an, ob ein Parameter übergeben wurde  \n\n## Siehe auch\n\n- [`lambda`, `#'` und Funktionsobjekte](./20251209-091200_higher-order-fn.clisp.md)\n"
+    }
+  ],
+  "links": [
+    {
+      "source": "20251209-231000",
+      "target": "20251209-001800"
+    },
+    {
+      "source": "20251209-231000",
+      "target": "20251209-085400"
+    },
+    {
+      "source": "20251209-231000",
+      "target": "20251209-085500"
+    },
+    {
+      "source": "20251209-231000",
+      "target": "20251209-085900"
+    },
+    {
+      "source": "20251209-231000",
+      "target": "20251209-090400"
+    },
+    {
+      "source": "20251209-231000",
+      "target": "20251209-091202"
+    },
+    {
+      "source": "20251209-231000",
+      "target": "20251209-091200"
+    },
+    {
+      "source": "20251209-231000",
+      "target": "20251209-091500"
+    },
+    {
+      "source": "20251209-091200",
+      "target": "20251209-091200"
+    },
+    {
+      "source": "20251209-091202",
+      "target": "20251209-001800"
+    },
+    {
+      "source": "20251209-091202",
+      "target": "20251209-085400"
+    },
+    {
+      "source": "20251209-091500",
+      "target": "20251209-091200"
+    }
+  ]
+}

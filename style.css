@@ -1,0 +1,39 @@
+.node-preview {
+  position: fixed;              /* immer im Viewport */
+  /* right: 1rem; */
+  top: 1rem;
+  max-width: 30rem;
+  max-height: 50vh;
+  overflow: auto;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+
+  background: rgba(10, 10, 10, 0.85); /* halbtransparent */
+  color: #f8f8f8;
+  backdrop-filter: blur(6px);
+
+  font-family: system-ui, sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.4;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  pointer-events: none;         /* nicht mit der Maus kollidieren */
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+  z-index: 9999;
+}
+
+.node-preview-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.node-preview-tags {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+}
+
+.node-preview-body {
+  white-space: pre-wrap;
+}
