@@ -1,4 +1,5 @@
 import { UnrealBloomPass } from  'https://esm.sh/three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import hljs from 'https://esm.sh/highlight.js@11.9.0';
 
 
 const Graph = new ForceGraph3D(document.getElementById('3d-graph'))
@@ -19,8 +20,8 @@ normalBloomPass.threshold = 0.03;
 normalBloomPass.enabled = true;
 
 const highlightBloomPass = new UnrealBloomPass();
-highlightBloomPass.strength = 0.9;   // nur on top
-highlightBloomPass.radius   = 0.9;   // etwas weitläufiger
+highlightBloomPass.strength = 0.25;   // nur on top
+highlightBloomPass.radius   = 0.8;   // etwas weitläufiger
 highlightBloomPass.threshold = 0.03;
 highlightBloomPass.enabled = false;
 
@@ -99,6 +100,7 @@ function handleNodeHover(node, prev) {
   }
 
   nodePreview.innerHTML = buildPreviewHtml(node);
+  applySyntaxHighlighting(nodePreview);
   nodePreview.style.opacity = 1;
 }
 let mouseX = 0;
@@ -144,6 +146,7 @@ function buildDetailHtml(node) {
 function openDetailPanel(node) {
   previewsize = 120;
   nodeDetail.innerHTML = buildDetailHtml(node);
+  applySyntaxHighlighting(nodeDetail);
   nodeDetail.classList.add('open');
 
   highlightBloomPass.enabled = true;
@@ -247,4 +250,14 @@ function updateSelection(node) {
 
 }
 
+
+function applySyntaxHighlighting(container) {
+  container.querySelectorAll('pre code').forEach(block => {
+    // Wenn schon gehighlighted: Flag entfernen, dann erneut highlighten
+    if (block.dataset.highlighted) {
+      delete block.dataset.highlighted;
+    }
+    hljs.highlightElement(block);
+  });
+}
 

@@ -1,31 +1,97 @@
+/*
+Breite des Detail-Panels:
+--zk-detail-width / --zk-detail-max-width
+
+Farben / Kontrast:
+--zk-bg, --zk-bg-strong, --zk-text, --zk-border-soft
+
+Typo global:
+--zk-font-family, --zk-font-size-preview, --zk-font-size-detail
+
+Schatten / „Glas“-Look:
+--zk-shadow-soft, --zk-shadow-strong, --zk-blur-preview, --zk-blur-detail
+*/
+/* ================================
+   Zettelkasten UI – Design Tokens
+   ================================ */
+:root {
+  /* Layout */
+  --zk-detail-width: 32rem;
+  --zk-detail-max-width: 40vw;
+  --zk-radius: 0.75rem;
+  --zk-shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.4);
+  --zk-shadow-strong: 0 0 25px rgba(0, 0, 0, 0.6);
+
+  /* Farben */
+  --zk-bg: rgba(10, 10, 10, 0.9);
+  --zk-bg-strong: rgba(10, 10, 10, 0.95);
+  --zk-text: #f8f8f8;
+  --zk-border-soft: rgba(255, 255, 255, 0.25);
+  --zk-border-strong: rgba(255, 255, 255, 0.3);
+  --zk-code-bg: rgba(255, 255, 255, 0.06);
+
+  /* Typografie */
+  --zk-font-family: system-ui, sans-serif;
+  --zk-font-size-preview: 0.85rem;
+  --zk-font-size-detail: 1.1rem;
+  --zk-line-height: 1.4;
+  --zk-line-height-detail: 1.5;
+
+  --zk-font-size-tags: 1rem;
+  --zk-font-size-title-preview: 0.95rem;
+  --zk-font-size-title-detail: 1.6rem;
+
+  /* Code */
+  --zk-code-font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  --zk-code-font-size-preview: 0.8rem;
+  --zk-code-font-size-detail: 1rem;
+
+  /* Effekte */
+  --zk-blur-preview: 6px;
+  --zk-blur-detail: 8px;
+  --zk-transition-fast: 0.15s ease-out;
+  --zk-transition-panel: 0.25s ease;
+}
+
+/* ================================
+   Gemeinsame Panel-Basis
+   ================================ */
+.node-preview,
+.node-detail {
+  font-family: var(--zk-font-family);
+  color: var(--zk-text);
+}
+
+/* ================================
+   Hover-Preview (Floating Panel)
+   ================================ */
 .node-preview {
   position: fixed;
   top: 1rem;
-  /* right: 1rem; */
   max-width: 30rem;
   max-height: 60vh;
   overflow: auto;
   padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
+  border-radius: var(--zk-radius);
 
-  background: rgba(10, 10, 10, 0.85);
-  color: #f8f8f8;
-  backdrop-filter: blur(6px);
+  background: var(--zk-bg);
+  backdrop-filter: blur(var(--zk-blur-preview));
 
-  font-family: system-ui, sans-serif;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-size: var(--zk-font-size-preview);
+  line-height: var(--zk-line-height);
 
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--zk-shadow-soft);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.15s ease-out;
+  transition: opacity var(--zk-transition-fast);
   z-index: 9999;
 }
 
 .node-preview-title {
   font-weight: 600;
   margin-bottom: 0.25rem;
+  font-size: var(--zk-font-size-title-preview);
 }
 
 .node-preview-tags {
@@ -34,64 +100,44 @@
   margin-bottom: 0.5rem;
 }
 
-.node-preview-body {
-  white-space: normal; /* damit Markdown schön umbricht */
-}
-
-.node-preview-body h1,
-.node-preview-body h2,
-.node-preview-body h3 {
-  font-size: 0.95rem;
-  margin: 0.5rem 0 0.25rem;
-}
-
-.node-preview-body code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 0.8rem;
-}
-
-.node-preview-body pre {
-  padding: 0.5rem;
-  border-radius: 0.4rem;
-  background: rgba(255,255,255,0.06);
-  overflow-x: auto;
-}
-
+/* Divider im Preview */
 .node-preview-divider {
   border: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  border-top: 1px solid var(--zk-border-soft);
   margin: 0.35rem 0 0.5rem;
 }
 
-/* Fester Detailbereich rechts */
+/* ================================
+   Detail-Panel rechts
+   ================================ */
 .node-detail {
   position: fixed;
   top: 0;
   right: 0;
-  width: 32rem;
-  max-width: 40vw;
+  width: var(--zk-detail-width);
+  max-width: var(--zk-detail-max-width);
   height: 100vh;
   overflow: auto;
   padding: 1rem 1.25rem;
   border-left: 1px solid rgba(255, 255, 255, 0.2);
 
-  background: rgba(10, 10, 10, 0.95);
-  color: #f8f8f8;
-  backdrop-filter: blur(8px);
+  background: var(--zk-bg-strong);
+  backdrop-filter: blur(var(--zk-blur-detail));
 
-  font-family: system-ui, sans-serif;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: var(--zk-font-size-detail);
+  line-height: var(--zk-line-height-detail);
 
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--zk-shadow-strong);
   z-index: 9998;
 
-  /* ---- hidden by default ---- */
+  /* hidden by default */
   transform: translateX(100%);
   opacity: 0;
   pointer-events: none;
 
-  transition: transform 0.25s ease, opacity 0.25s ease;
+  transition:
+    transform var(--zk-transition-panel),
+    opacity var(--zk-transition-panel);
 }
 
 /* Sichtbar-Zustand */
@@ -101,71 +147,88 @@
   pointer-events: auto;
 }
 
-/* Optional: Graph nicht unter das Panel schieben,
-   wenn du das per Layout löst, kannst du das weglassen */
-#3d-graph {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 32rem; /* gleiche Breite wie .node-detail */
-  bottom: 0;
-}
-
 /* Detail-Inhalt */
 .node-detail-title {
   font-weight: 650;
-  font-size: 1.1rem;
+  font-size: var(--zk-font-size-title-detail);
   margin-bottom: 0.35rem;
 }
 
 .node-detail-tags {
-  font-size: 0.8rem;
+  font-size: var(--zk-font-size-tags);
   opacity: 0.85;
   margin-bottom: 0.6rem;
 }
 
 .node-detail-divider {
   border: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  border-top: 1px solid var(--zk-border-strong);
   margin: 0.4rem 0 0.75rem;
 }
 
 .node-detail-body {
+  padding: 1rem 0;
   white-space: normal;
 }
 
-/* Markdown etwas hübscher */
-.node-detail-body h1,
-.node-detail-body h2,
-.node-detail-body h3 {
-  font-size: 1rem;
-  margin: 0.7rem 0 0.35rem;
-}
-
-.node-detail-body p {
-  margin: 0.3rem 0 0.5rem;
-}
-
-.node-detail-body code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 0.82rem;
-}
-
-.node-detail-body pre {
-  padding: 0.6rem 0.7rem;
-  border-radius: 0.4rem;
-  background: rgba(255, 255, 255, 0.06);
-  overflow-x: auto;
-  margin: 0.5rem 0 0.7rem;
-}
-
+/* Close-Button */
 .node-detail-close {
   position: sticky;
   top: 0;
   float: right;
   background: none;
   border: none;
-  color: #fff;
+  color: var(--zk-text);
   font-size: 1.2rem;
   cursor: pointer;
+}
+
+/* ================================
+   Markdown-Styling (Preview + Detail)
+   ================================ */
+
+.node-preview-body,
+.node-detail-body {
+  white-space: normal;
+}
+
+/* Überschriften im Inhalt */
+.node-preview-body h1,
+.node-preview-body h2,
+.node-preview-body h3,
+.node-detail-body h1,
+.node-detail-body h2,
+.node-detail-body h3 {
+  font-size: 1rem;
+  margin: 1.9rem 0 0.7rem;
+}
+
+/* Paragraphen */
+.node-preview-body p,
+.node-detail-body p {
+  margin: 0.3rem 0 0.5rem;
+}
+
+/* Inline-Code */
+.node-preview-body code,
+.node-detail-body code {
+  font-family: var(--zk-code-font-family);
+}
+
+.node-preview-body code {
+  font-size: var(--zk-code-font-size-preview);
+}
+
+.node-detail-body code {
+  font-size: var(--zk-code-font-size-detail);
+}
+
+/* Codeblöcke */
+.node-preview-body pre,
+.node-detail-body pre {
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.4rem;
+  background: var(--zk-code-bg);
+  overflow-x: auto;
+  margin: 0.5rem 0 0.7rem;
 }
