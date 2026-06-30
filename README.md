@@ -30,6 +30,32 @@ npx zettel-graph graph ./notes -o g.json  # just emit the graph JSON
 `dir` defaults to the current directory. Try the bundled sample with
 `npx zettel-graph examples`.
 
+### Start a new bundle
+
+New to OKF? Scaffold a bundle and an agent guide in one command:
+
+```sh
+npx zettel-graph init            # creates ./knowledge
+npx zettel-graph init docs       # or any directory you name
+```
+
+This writes `<dir>/AGENTS.md` — an agent-facing guide to OKF, the
+[llm-wiki](https://gist.github.com/s-frick/299bbaea1569f585d06543d66f6ba077)
+workflow, and this tool — plus seeded `index.md` and `log.md` and a starter
+note. Visualize it with `npx zettel-graph <dir>`. Existing files are never
+overwritten (use `-f` to force).
+
+The guide ships **passive by default** and carries a **policy block** the agent
+sets up _with you_ on first run: which topics to track, and how autonomous it
+should be (`off` / `suggest` / `auto`) about capturing new knowledge and
+maintaining existing notes — links, stale notes, revisions. Destructive actions
+always need your confirmation.
+
+The `AGENTS.md` is read automatically by agents that pick up the nearest
+`AGENTS.md` (Codex, Cursor, OpenCode, Gemini, …). For Claude Code, add
+`See @<dir>/AGENTS.md for the knowledge bundle.` to your root `CLAUDE.md` — the
+agent offers to wire this up during first-run setup.
+
 ### Commands
 
 | Command                  | What it does                                          |
@@ -37,7 +63,9 @@ npx zettel-graph graph ./notes -o g.json  # just emit the graph JSON
 | `dev [dir]`              | Vite dev server with hot-reload (default command)     |
 | `build [dir] -o out`     | Static site into `out/` (default `dist/`)             |
 | `graph [dir] -o file`    | Write `graph.json` (stdout if no `-o`)                |
+| `init [dir]`             | Scaffold an OKF bundle + agent guide (default `./knowledge`) |
 | `-p <port>`              | Dev server port                                       |
+| `-f`                     | `init`: overwrite existing files                      |
 
 ## OKF bundle format
 
@@ -58,6 +86,7 @@ timestamp: 2026-06-30 # optional
   Use bundle-relative links (`[Parser](/components/parser.md)`) for stability,
   or relative ones (`[Parser](../components/parser.md)`).
 - **Reserved files**: `index.md` and `log.md` are navigation, not nodes.
+  `AGENTS.md`, `CLAUDE.md` and `README.md` are also excluded (docs, not knowledge).
 - **Ghost nodes**: links to files that do not exist yet render as faint
   placeholder nodes — a visible prompt to fill the gap.
 

@@ -10,7 +10,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
 
-const RESERVED = new Set(['index.md', 'log.md']);
+// Files that are never concept nodes:
+//   - index.md / log.md: OKF-reserved navigation files (spec §6–7).
+//   - AGENTS.md / CLAUDE.md: agent/schema-layer docs (llm-wiki), not knowledge.
+//   - README.md: bundle docs, not a concept.
+const NON_NODES = new Set(['index.md', 'log.md', 'AGENTS.md', 'CLAUDE.md', 'README.md']);
 // Dependency/build dirs are full of unrelated .md (READMEs); never treat them
 // as part of the bundle. Dotfiles (e.g. .git) are skipped separately.
 const IGNORE_DIRS = new Set(['node_modules', 'dist', 'build', 'vendor']);
@@ -58,7 +62,7 @@ function normalizeTags(tags) {
 
 export function buildGraph(bundleDir) {
   const root = path.resolve(bundleDir);
-  const files = walk(root).filter((f) => !RESERVED.has(path.basename(f)));
+  const files = walk(root).filter((f) => !NON_NODES.has(path.basename(f)));
 
   const nodes = new Map();
   const bodies = new Map();
@@ -92,7 +96,7 @@ export function buildGraph(bundleDir) {
     while ((m = LINK_RE.exec(content)) !== null) {
       const target = resolveLink(m[1], id);
       if (!target || target === id) continue;
-      if (RESERVED.has(path.basename(target))) continue;
+      if (NON_NODES.has(path.basename(target))) continue;
       if (!nodes.has(target)) {
         nodes.set(target, {
           id: target,
