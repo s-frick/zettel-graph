@@ -198,6 +198,108 @@ body {
   color: #8ab4f8;
 }
 
+/* Search (top-left) */
+.search-box {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  width: 22rem;
+  max-width: 80vw;
+  z-index: 9999;
+  font-family: var(--zk-font-family);
+}
+
+.search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.8rem;
+  border-radius: var(--zk-radius);
+  border: 1px solid var(--zk-border-soft);
+  background: var(--zk-bg);
+  backdrop-filter: blur(var(--zk-blur-preview));
+  color: var(--zk-text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  box-shadow: var(--zk-shadow-soft);
+  transition: border-color var(--zk-transition-fast);
+}
+
+.search-input:focus {
+  border-color: #ffcc00;
+}
+
+.search-input::placeholder {
+  color: rgba(248, 248, 248, 0.45);
+}
+
+.search-results {
+  margin-top: 0.4rem;
+  max-height: 60vh;
+  overflow-y: auto;
+  border-radius: var(--zk-radius);
+  background: var(--zk-bg-strong);
+  backdrop-filter: blur(var(--zk-blur-detail));
+  box-shadow: var(--zk-shadow-soft);
+  display: none;
+}
+
+.search-results.open {
+  display: block;
+}
+
+.search-count {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.55;
+  border-bottom: 1px solid var(--zk-border-soft);
+}
+
+.search-empty {
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+.search-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.search-row:last-child {
+  border-bottom: 0;
+}
+
+.search-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.search-row.active {
+  background: rgba(255, 204, 0, 0.16);
+}
+
+.search-row-title {
+  font-size: 0.85rem;
+  color: var(--zk-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-row-type {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* Type legend (bottom-left) */
 .legend {
   position: fixed;
