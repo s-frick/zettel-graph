@@ -39,6 +39,15 @@ export function create3dRenderer(container, handlers = {}) {
     }
   })();
 
+  let pendingFit = false;
+  G.onEngineStop(() => {
+    if (!pendingFit) return;
+    pendingFit = false;
+    G.zoomToFit(400, 40);
+  });
+  el.addEventListener('pointerdown', () => { pendingFit = false; }, { passive: true });
+  el.addEventListener('wheel', () => { pendingFit = false; }, { passive: true });
+
   const onResize = () => G.width(el.clientWidth).height(el.clientHeight);
   window.addEventListener('resize', onResize);
   onResize();
@@ -51,7 +60,11 @@ export function create3dRenderer(container, handlers = {}) {
     refresh: () => G.nodeColor(nodeColor).nodeVal(nodeSize).linkColor(linkColor).linkWidth(linkWidth),
     setBackground: (css) => G.backgroundColor(css),
     resize: onResize,
-    zoomToFit: (ms = 600) => G.zoomToFit(ms, 40),
+    zoomToFit: (ms = 600) => {
+      pendingFit = false;
+      G.zoomToFit(ms, 40);
+    },
+    fitWhenSettled: () => { pendingFit = true; },
     setForces: (f) => {
       G.d3Force('charge')?.strength(f.charge);
       G.d3Force('link')?.distance(f.linkDistance).strength(f.linkStrength);

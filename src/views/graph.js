@@ -24,6 +24,8 @@ export function createGraphView() {
     });
     renderer.setForces(state.forces);
     pushData(positions);
+    // Switching 2D<->3D starts a fresh layout, so it earns a fit of its own.
+    if (state.ready) renderer.fitWhenSettled();
     return renderer;
   }
 
@@ -79,6 +81,9 @@ export function createGraphView() {
       if (keys.has('model') || keys.has('filters') || keys.has('localGraph') || keys.has('timeline')) {
         pushData(capturePositions(renderer));
       }
+      // The app signals readiness once every panel has applied its initial
+      // state; that is the first moment a fit is worth attempting.
+      if (keys.has('ready') && state.ready) renderer.fitWhenSettled();
       if (keys.has('forces')) renderer.setForces(state.forces);
       if (keys.has('theme')) renderer.setBackground(canvasBackground());
       renderer.refresh();
@@ -92,7 +97,8 @@ export function createGraphView() {
       else pendingFocus = id;
     },
 
-    zoomToFit(ms) {
+    /** Toolbar "fit" button and the f key. */
+    fit(ms = 600) {
       renderer?.zoomToFit(ms);
     },
 

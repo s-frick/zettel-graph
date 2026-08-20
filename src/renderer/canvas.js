@@ -26,6 +26,10 @@ export function create2dRenderer(container, handlers = {}) {
   container.appendChild(el);
 
   let zoomK = 1;
+  // A fit requested before the layout has settled. Panels restoring persisted
+  // forces reheat the simulation, so "engine stopped" fires several times right
+  // after boot — arming a one-shot is the only way to land on a stable layout.
+  let pendingFit = false;
   // Adjacency of the *visible* graph — the model's adjacency does not know about
   // injected pseudo-nodes (tag nodes), so we derive it from the data we render.
   let neighbors = new Map();
@@ -153,6 +157,17 @@ export function create2dRenderer(container, handlers = {}) {
     .onNodeClick((node, ev) => handlers.onNodeClick?.(node, ev))
     .onBackgroundClick((ev) => handlers.onBackgroundClick?.(ev));
 
+  G.onEngineStop(() => {
+    if (!pendingFit) return;
+    pendingFit = false;
+    G.zoomToFit(400, 60);
+  });
+  // Touching the viewport yourself cancels a pending fit — nothing should yank
+  // the camera away once you have started navigating.
+  for (const ev of ['wheel', 'pointerdown']) {
+    el.addEventListener(ev, () => { pendingFit = false; }, { passive: true });
+  }
+
   const onResize = () => G.width(el.clientWidth).height(el.clientHeight);
   const ro = new ResizeObserver(onResize);
   ro.observe(el);
@@ -184,7 +199,11 @@ export function create2dRenderer(container, handlers = {}) {
 
     setBackground: (css) => G.backgroundColor(css),
     resize: onResize,
-    zoomToFit: (ms = 600) => G.zoomToFit(ms, 60),
+    zoomToFit: (ms = 600) => {
+      pendingFit = false; // an explicit fit wins over a queued one
+      G.zoomToFit(ms, 60);
+    },
+    fitWhenSettled: () => { pendingFit = true; },
 
     setForces(f) {
       G.d3Force('charge')?.strength(f.charge);

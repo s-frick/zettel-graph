@@ -7,13 +7,14 @@ import { el } from '../ui/dom.js';
 
 const LABELS = { graph: 'Graph', hierarchy: 'Hierarchy', matrix: 'Matrix', lint: 'Health' };
 
-export function createToolbar() {
+export function createToolbar({ onFit } = {}) {
   const bar = el('div.zk-toolbar');
 
   const viewBtns = VIEW_ORDER.map((id) =>
     el('button.zk-tab', { 'data-view': id, text: LABELS[id] || id, onclick: () => setState({ view: id }) }),
   );
   const modeBtn = el('button.zk-tab.zk-mode', { onclick: () => setState({ renderMode: state.renderMode === '3d' ? '2d' : '3d' }) });
+  const fitBtn = el('button.zk-tab', { title: 'fit graph to view (f)', text: '⤿', onclick: () => onFit?.() });
   const themeBtn = el('button.zk-tab', { title: 'toggle theme', text: '◐', onclick: () => setState({ theme: state.theme === 'dark' ? 'light' : 'dark' }) });
 
   const colorSel = el('select.zk-select', {
@@ -23,13 +24,16 @@ export function createToolbar() {
     colorSel.append(el('option', { value: v, text: label }));
   }
 
-  bar.append(el('div.zk-tabs', {}, ...viewBtns), modeBtn, colorSel, themeBtn);
+  bar.append(el('div.zk-tabs', {}, ...viewBtns), fitBtn, modeBtn, colorSel, themeBtn);
 
   function render() {
     for (const b of viewBtns) b.classList.toggle('active', b.dataset.view === state.view);
     modeBtn.textContent = state.renderMode === '3d' ? '3D' : '2D';
     modeBtn.title = `switch to ${state.renderMode === '3d' ? '2D' : '3D'} (press 2/3)`;
-    modeBtn.style.display = state.view === 'graph' ? '' : 'none';
+    // Both only mean anything for the force layout.
+    const graphOnly = state.view === 'graph' ? '' : 'none';
+    modeBtn.style.display = graphOnly;
+    fitBtn.style.display = graphOnly;
     colorSel.value = state.colorBy;
   }
 

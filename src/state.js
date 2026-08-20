@@ -26,6 +26,13 @@ export const state = {
   /** Light/dark chrome for canvas + panels. @type {'dark'|'light'} */
   theme: 'dark',
 
+  /**
+   * True once the first graph is loaded and every panel has applied its
+   * persisted/hash state. Panels that need a settled app (rather than a settled
+   * DOM) hang off this rather than guessing with timers.
+   */
+  ready: false,
+
   /** Zen reading mode for the detail drawer: note gets the screen, rest fades. */
   zen: false,
 

@@ -5,7 +5,9 @@
 //   setData(g)     g = { nodes, links } (plain ids on links)
 //   refresh()      re-read the shared styling accessors (colour/size changed)
 //   focus(node)    fly/pan the camera to a node
-//   zoomToFit(ms)
+//   zoomToFit(ms)        fit now
+//   fitWhenSettled()     fit once the simulation next comes to rest; cancelled
+//                        if the user pans/zooms first
 //   setForces(f)   f = state.forces
 //   setBackground(css)
 //   resize()

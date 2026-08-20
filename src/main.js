@@ -38,7 +38,7 @@ async function mountView(id) {
 }
 
 // ---------- panels ----------
-const toolbar = createToolbar();
+const toolbar = createToolbar({ onFit: () => views.get('graph')?.fit() });
 toolbar.mount(overlayHost);
 
 const panels = createPanels({
@@ -83,6 +83,7 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'h') setState({ view: 'hierarchy' });
   else if (e.key === 'm') setState({ view: 'matrix' });
   else if (e.key === 'l') setState({ view: 'lint' });
+  else if (e.key === 'f' && state.view === 'graph') views.get('graph')?.fit();
 });
 
 (async function boot() {
@@ -91,6 +92,9 @@ document.addEventListener('keydown', (e) => {
   document.documentElement.dataset.view = state.view;
   await mountView(state.view);
   await loadGraph();
+  // Everything that reads persisted or hash state has applied it by now, so
+  // anything waiting on a settled app (the initial graph fit) can go ahead.
+  setState({ ready: true });
 })();
 
 if (import.meta.hot) {
