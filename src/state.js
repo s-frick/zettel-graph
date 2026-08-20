@@ -26,6 +26,9 @@ export const state = {
   /** Light/dark chrome for canvas + panels. @type {'dark'|'light'} */
   theme: 'dark',
 
+  /** Zen reading mode for the detail drawer: note gets the screen, rest fades. */
+  zen: false,
+
   // ---- selection / hover ----
   selectedId: null,
   hoverId: null,

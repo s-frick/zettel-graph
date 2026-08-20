@@ -3,6 +3,8 @@
 @import './base.css';
 @import './panels.css';
 @import './toolbar.css';
+@import './zen.css';
+@import './mermaid.css';
 @import './renderer.css';
 @import './panel-forces.css';
 @import './panel-filters.css';

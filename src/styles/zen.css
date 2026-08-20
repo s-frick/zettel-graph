@@ -1,0 +1,94 @@
+/* Zen reading mode — the note becomes the page, everything else recedes. */
+
+.zk-zen-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  background: var(--zk-canvas-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--zk-transition-panel);
+}
+
+:root[data-zen] .zk-zen-backdrop {
+  opacity: 0.82;
+  pointer-events: auto;
+}
+
+/* Blur the graph itself rather than hiding it, so the note keeps its context. */
+:root[data-zen] .zk-view-host {
+  filter: blur(4px) saturate(0.5);
+  transition: filter var(--zk-transition-panel);
+}
+
+/* Every other overlay fades back but stays reachable on hover. */
+:root[data-zen] .zk-overlays > *:not(.node-detail):not(.zk-zen-backdrop) {
+  opacity: 0.12;
+  transition: opacity var(--zk-transition-fast);
+}
+
+:root[data-zen] .zk-overlays > *:not(.node-detail):not(.zk-zen-backdrop):hover {
+  opacity: 1;
+}
+
+/* The drawer turns into a centred reading column. */
+.node-detail.zen {
+  top: 2.5rem;
+  right: 50%;
+  transform: translateX(50%);
+  width: min(64rem, 92vw);
+  max-width: none;
+  height: calc(100vh - 5rem);
+  border: 1px solid var(--zk-border-soft);
+  border-radius: var(--zk-radius);
+  padding: 2.5rem 3.5rem 3rem;
+  z-index: 9995;
+}
+
+.node-detail.zen .node-detail-body {
+  font-size: 1.12rem;
+  line-height: 1.65;
+}
+
+/* Prose keeps a comfortable measure… */
+.node-detail.zen .node-detail-body > p,
+.node-detail.zen .node-detail-body > ul,
+.node-detail.zen .node-detail-body > ol,
+.node-detail.zen .node-detail-body > blockquote,
+.node-detail.zen .node-detail-body > h1,
+.node-detail.zen .node-detail-body > h2,
+.node-detail.zen .node-detail-body > h3,
+.node-detail.zen .node-detail-body > h4 {
+  max-width: 46rem;
+}
+
+.node-detail.zen .node-detail-title {
+  font-size: 2.1rem;
+  line-height: 1.2;
+}
+
+.node-detail.zen .node-detail-backlinks {
+  max-width: 46rem;
+}
+
+/* …while diagrams, code and tables get the extra room zen mode exists for. */
+.node-detail.zen .zk-mermaid,
+.node-detail.zen .node-detail-body > pre,
+.node-detail.zen .node-detail-body > table {
+  max-width: none;
+}
+
+.node-detail.zen .zk-mermaid svg {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 60rem) {
+  .node-detail.zen {
+    width: 100vw;
+    top: 0;
+    height: 100vh;
+    border-radius: 0;
+    padding: 2.5rem 1.25rem 2rem;
+  }
+}

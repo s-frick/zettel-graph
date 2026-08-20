@@ -72,7 +72,11 @@ subscribe(async (keys) => {
 
 document.addEventListener('keydown', (e) => {
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-  if (e.key === 'Escape' || e.key === 'q') setState({ selectedId: null, neighborIds: new Set() });
+  if (e.key === 'Escape' || e.key === 'q') {
+    // Escape backs out one layer at a time: zen first, then the selection.
+    if (state.zen) setState({ zen: false });
+    else setState({ selectedId: null, neighborIds: new Set() });
+  } else if (e.key === 'z') setState({ zen: !state.zen });
   else if (e.key === '2') setState({ renderMode: '2d' });
   else if (e.key === '3') setState({ renderMode: '3d' });
   else if (e.key === 'g') setState({ view: 'graph' });

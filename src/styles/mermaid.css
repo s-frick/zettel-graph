@@ -1,0 +1,42 @@
+/* Rendered ```mermaid blocks inside the preview/detail panels. */
+
+.zk-mermaid {
+  margin: 1rem 0 1.25rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--zk-code-bg);
+  /* Diagrams are often wider than the drawer; scroll them rather than the page. */
+  overflow-x: auto;
+  text-align: center;
+}
+
+.zk-mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.zk-mermaid-pending {
+  font-size: 0.8rem;
+  opacity: 0.5;
+  text-align: left;
+  font-style: italic;
+}
+
+.zk-mermaid-failed {
+  border-left: 2px solid #f7768e;
+  text-align: left;
+}
+
+.zk-mermaid-error {
+  font-size: 0.75rem;
+  color: #f7768e;
+  margin-bottom: 0.4rem;
+}
+
+.zk-mermaid-failed pre {
+  margin: 0;
+  font-family: var(--zk-code-font-family);
+  font-size: 0.78rem;
+  white-space: pre-wrap;
+  opacity: 0.75;
+}

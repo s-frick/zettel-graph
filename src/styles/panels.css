@@ -3,6 +3,8 @@
 :root {
   --zk-detail-width: 32rem;
   --zk-detail-max-width: 40vw;
+  /* Vertical space the fixed toolbar occupies in the top-right corner. */
+  --zk-toolbar-clear: 3.75rem;
   --zk-font-size-preview: 0.85rem;
   --zk-font-size-detail: 1.05rem;
   --zk-line-height: 1.4;
@@ -63,14 +65,13 @@
 /* Detail panel (right) */
 .node-detail {
   position: fixed;
-  top: 0;
+  top: var(--zk-toolbar-clear);
   right: 0;
   width: var(--zk-detail-width);
   max-width: var(--zk-detail-max-width);
-  height: 100vh;
+  height: calc(100vh - var(--zk-toolbar-clear));
   overflow: auto;
-  /* Clear the toolbar, which floats above this panel in the top-right. */
-  padding: 3.6rem 1.25rem 1rem;
+  padding: 1rem 1.25rem;
   border-left: 1px solid var(--zk-border-soft);
   background: var(--zk-bg-strong);
   backdrop-filter: blur(var(--zk-blur-detail));
@@ -123,15 +124,31 @@
   padding: 1rem 0;
 }
 
-.node-detail-close {
+.node-detail-actions {
   position: sticky;
   top: 0;
   float: right;
+  display: flex;
+  gap: 0.15rem;
+  z-index: 1;
+}
+
+.node-detail-btn {
   background: none;
   border: none;
   color: var(--zk-text);
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.2rem 0.35rem;
+  border-radius: 0.35rem;
   cursor: pointer;
+  opacity: 0.65;
+  transition: opacity var(--zk-transition-fast), background var(--zk-transition-fast);
+}
+
+.node-detail-btn:hover {
+  opacity: 1;
+  background: var(--zk-hover);
 }
 
 /* Markdown content */
