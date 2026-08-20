@@ -68,10 +68,20 @@ export function buildGraph(bundleDir) {
   const bodies = new Map();
 
   // Pass 1: nodes.
+  const warnings = [];
   for (const file of files) {
     const id = toId(root, file);
     const raw = fs.readFileSync(file, 'utf8');
-    const { data: fm, content } = matter(raw);
+    // A single note with broken YAML must never take the whole bundle down;
+    // fall back to treating the file as body-only and surface a warning.
+    let fm = {};
+    let content = raw;
+    try {
+      ({ data: fm, content } = matter(raw));
+    } catch (err) {
+      warnings.push({ id, message: String(err.message).split('\n')[0] });
+      content = raw.replace(/^---[\s\S]*?\n---\s*/m, '');
+    }
     bodies.set(id, content);
     const h1 = content.match(/^#\s+(.*)$/m);
     nodes.set(id, {
@@ -84,6 +94,7 @@ export function buildGraph(bundleDir) {
       timestamp: fm.timestamp || null,
       raw,
       ghost: false,
+      invalidFrontmatter: warnings.length > 0 && warnings[warnings.length - 1].id === id,
     });
   }
 
@@ -117,5 +128,7 @@ export function buildGraph(bundleDir) {
     }
   }
 
-  return { nodes: [...nodes.values()], links };
+  for (const w of warnings) console.warn(`[okf] invalid frontmatter in ${w.id}: ${w.message}`);
+
+  return { nodes: [...nodes.values()], links, warnings };
 }

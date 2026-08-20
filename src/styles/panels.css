@@ -1,41 +1,19 @@
-/* Design tokens. */
+/* Preview / detail / search / legend panels. Shared tokens live in base.css. */
+
 :root {
   --zk-detail-width: 32rem;
   --zk-detail-max-width: 40vw;
-  --zk-radius: 0.75rem;
-  --zk-shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.4);
-  --zk-shadow-strong: 0 0 25px rgba(0, 0, 0, 0.6);
-
-  --zk-bg: rgba(10, 10, 10, 0.9);
-  --zk-bg-strong: rgba(10, 10, 10, 0.95);
-  --zk-text: #f8f8f8;
-  --zk-border-soft: rgba(255, 255, 255, 0.25);
-  --zk-border-strong: rgba(255, 255, 255, 0.3);
-  --zk-code-bg: rgba(255, 255, 255, 0.06);
-
-  --zk-font-family: system-ui, sans-serif;
   --zk-font-size-preview: 0.85rem;
   --zk-font-size-detail: 1.05rem;
   --zk-line-height: 1.4;
   --zk-line-height-detail: 1.5;
-
   --zk-font-size-tags: 0.95rem;
   --zk-font-size-title-preview: 0.95rem;
   --zk-font-size-title-detail: 1.6rem;
-
-  --zk-code-font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
   --zk-code-font-size-preview: 0.8rem;
   --zk-code-font-size-detail: 0.95rem;
-
   --zk-blur-preview: 6px;
   --zk-blur-detail: 8px;
-  --zk-transition-fast: 0.15s ease-out;
-  --zk-transition-panel: 0.25s ease;
-}
-
-body {
-  margin: 0;
 }
 
 .node-preview,
@@ -92,7 +70,7 @@ body {
   height: 100vh;
   overflow: auto;
   padding: 1rem 1.25rem;
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  border-left: 1px solid var(--zk-border-soft);
   background: var(--zk-bg-strong);
   backdrop-filter: blur(var(--zk-blur-detail));
   font-size: var(--zk-font-size-detail);
@@ -131,7 +109,7 @@ body {
 }
 
 .node-detail-resource a {
-  color: #8ab4f8;
+  color: var(--zk-link);
 }
 
 .node-detail-divider {
@@ -195,7 +173,7 @@ body {
 
 .node-preview-body a,
 .node-detail-body a {
-  color: #8ab4f8;
+  color: var(--zk-link);
 }
 
 /* Search (top-left) */
@@ -230,7 +208,7 @@ body {
 }
 
 .search-input::placeholder {
-  color: rgba(248, 248, 248, 0.45);
+  color: var(--zk-text-dim);
 }
 
 .search-results {
@@ -270,7 +248,7 @@ body {
   gap: 0.6rem;
   padding: 0.45rem 0.8rem;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--zk-border-soft);
 }
 
 .search-row:last-child {
@@ -278,7 +256,7 @@ body {
 }
 
 .search-row:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--zk-hover);
 }
 
 .search-row.active {
@@ -337,3 +315,23 @@ body {
   border-radius: 50%;
   display: inline-block;
 }
+
+/* --- additions for the multi-view shell --- */
+.legend-row { cursor: pointer; }
+.legend-row.off { opacity: 0.3; }
+.legend-label { flex: 1; }
+.legend-count { font-size: 0.7rem; opacity: 0.5; font-family: var(--zk-code-font-family); }
+.legend { max-height: 45vh; overflow-y: auto; }
+
+.node-detail-path {
+  font-family: var(--zk-code-font-family);
+  font-size: 0.7rem; opacity: 0.5; margin-bottom: 0.4rem; word-break: break-all;
+}
+.node-detail-backlinks { margin-top: 1.5rem; border-top: 1px solid var(--zk-border-soft); padding-top: 0.75rem; }
+.node-detail-backlinks h4 {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
+  opacity: 0.6; margin: 0 0 0.4rem;
+}
+.node-detail-backlinks ul { margin: 0; padding-left: 1.1rem; font-size: 0.85rem; }
+.node-detail-backlinks a { color: var(--zk-link); text-decoration: none; }
+.node-detail-backlinks a:hover { text-decoration: underline; }

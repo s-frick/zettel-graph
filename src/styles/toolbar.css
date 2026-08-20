@@ -1,0 +1,23 @@
+/* Top-right toolbar: view tabs, 2D/3D, colour-by, theme. */
+.zk-toolbar {
+  position: fixed; top: 1rem; right: 1rem;
+  display: flex; align-items: center; gap: 0.4rem;
+  z-index: 9999; font-family: var(--zk-font-family);
+}
+.zk-tabs { display: flex; gap: 0.15rem; }
+.zk-tab {
+  padding: 0.4rem 0.7rem; font: inherit; font-size: 0.78rem;
+  color: var(--zk-text); background: var(--zk-bg); cursor: pointer;
+  border: 1px solid var(--zk-border-soft); border-radius: var(--zk-radius);
+  backdrop-filter: blur(6px); box-shadow: var(--zk-shadow-soft);
+  transition: background var(--zk-transition-fast), border-color var(--zk-transition-fast);
+}
+.zk-tab:hover { background: var(--zk-bg-strong); }
+.zk-tab.active { border-color: var(--zk-accent); color: var(--zk-accent); }
+.zk-mode { font-family: var(--zk-code-font-family); min-width: 2.6rem; }
+.zk-select {
+  padding: 0.4rem 0.5rem; font: inherit; font-size: 0.78rem;
+  color: var(--zk-text); background: var(--zk-bg);
+  border: 1px solid var(--zk-border-soft); border-radius: var(--zk-radius);
+  backdrop-filter: blur(6px); cursor: pointer;
+}
