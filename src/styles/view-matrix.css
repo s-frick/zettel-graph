@@ -6,14 +6,14 @@
 .zk-matrix-scroll {
   position: absolute; inset: 0;
   overflow: auto;
-  padding: 1rem 1rem 6rem 1rem;
+  padding: 4.2rem 1rem 6rem 1rem;
   background: var(--zk-canvas-bg);
 }
 .zk-matrix-canvas { display: block; cursor: crosshair; }
 .zk-matrix-empty { position: absolute; inset: 0; }
 
 .zk-matrix-controls {
-  position: absolute; left: 1rem; bottom: 1rem;
+  position: absolute; right: 1rem; bottom: 1rem;
   width: 12rem; z-index: 5;
 }
 

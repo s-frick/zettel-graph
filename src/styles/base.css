@@ -41,7 +41,10 @@
 }
 
 html, body { height: 100%; margin: 0; }
-body { background: var(--zk-canvas-bg); color: var(--zk-text); font-family: var(--zk-font-family); }
+body { color: var(--zk-text); font-family: var(--zk-font-family); }
+
+:root[data-theme] body,
+:root[data-theme] #app { background: var(--zk-canvas-bg); }
 
 #app { position: relative; height: 100%; overflow: hidden; }
 
@@ -57,6 +60,13 @@ body { background: var(--zk-canvas-bg); color: var(--zk-text); font-family: var(
   display: flex; align-items: center; justify-content: center;
   height: 100%; opacity: 0.4; font-size: 0.95rem; letter-spacing: 0.02em;
 }
+
+.zk-view-placeholder[hidden] { display: none; }
+
+/* Views that are plain documents rather than a canvas: the graph-only overlays
+   would just sit on top of their content. */
+:root[data-view='lint'] .legend,
+:root[data-view='lint'] .zk-timeline { display: none; }
 
 /* Reusable panel chrome — use this for new panels. */
 .zk-panel {

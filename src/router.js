@@ -30,7 +30,7 @@ export function applyHashToState() {
   for (const c of codecs) {
     const raw = params.get(c.key);
     if (raw == null) continue;
-    for (const [k, v] of Object.entries(c.write(decodeURIComponent(raw)))) {
+    for (const [k, v] of Object.entries(c.write(raw))) {
       const isPlain = (o) => o && typeof o === 'object' && !Array.isArray(o) && !(o instanceof Set);
       patch[k] = isPlain(patch[k]) && isPlain(v) ? { ...patch[k], ...v } : v;
     }
@@ -47,7 +47,7 @@ export function syncStateToHash() {
   const params = new URLSearchParams();
   for (const c of codecs) {
     const v = c.read();
-    if (v) params.set(c.key, encodeURIComponent(v));
+    if (v) params.set(c.key, v);
   }
   const next = '#' + params.toString();
   if (next !== location.hash) history.replaceState(null, '', next);

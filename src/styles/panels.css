@@ -69,7 +69,8 @@
   max-width: var(--zk-detail-max-width);
   height: 100vh;
   overflow: auto;
-  padding: 1rem 1.25rem;
+  /* Clear the toolbar, which floats above this panel in the top-right. */
+  padding: 3.6rem 1.25rem 1rem;
   border-left: 1px solid var(--zk-border-soft);
   background: var(--zk-bg-strong);
   backdrop-filter: blur(var(--zk-blur-detail));

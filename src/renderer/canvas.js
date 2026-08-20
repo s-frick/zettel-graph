@@ -12,7 +12,7 @@ import { nodeColor, nodeSize, linkColor, linkWidth, canvasBackground, SELECT_COL
 
 // Zoom at which a degree-0 node reveals its label. Hubs divide this down, so a
 // well-connected node stays labelled much further out (Obsidian behaviour).
-const LABEL_ZOOM = 1.7;
+const LABEL_ZOOM = 3.4;
 // Width of the fade band below the threshold — avoids labels popping in.
 const LABEL_FADE = 0.35;
 const LABEL_PX = 12;
@@ -38,7 +38,7 @@ export function create2dRenderer(container, handlers = {}) {
   };
 
   function labelAlpha(node) {
-    const threshold = LABEL_ZOOM / (1 + Math.sqrt(node.degree || 0));
+    const threshold = LABEL_ZOOM / (1 + Math.sqrt(node.degree || 0) / 3);
     if (zoomK >= threshold) return 1;
     if (zoomK <= threshold - LABEL_FADE) return 0;
     return (zoomK - (threshold - LABEL_FADE)) / LABEL_FADE;
@@ -237,12 +237,12 @@ function applyCurvature(links = []) {
     const t = l.target && l.target.id != null ? l.target.id : l.target;
     return [s, t];
   };
-  for (const l of links) seen.add(key(l).join(' '));
+  for (const l of links) seen.add(key(l).join('\u0000'));
   for (const l of links) {
     const [s, t] = key(l);
     if (s === t) {
       l.__curvature = 0.5; // self-loop needs a visible arc
-    } else if (seen.has(`${t} ${s}`)) {
+    } else if (seen.has(`${t}\u0000${s}`)) {
       l.__curvature = s < t ? CURVATURE : -CURVATURE;
     } else {
       l.__curvature = 0;

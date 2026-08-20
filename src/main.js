@@ -65,6 +65,7 @@ subscribe(async (keys) => {
   if (keys.has('view')) await mountView(state.view);
   else await active?.update?.(keys);
   if (keys.has('theme')) document.documentElement.dataset.theme = state.theme;
+  if (keys.has('view')) document.documentElement.dataset.view = state.view;
   toolbar.render();
   syncStateToHash();
 });
@@ -83,6 +84,7 @@ document.addEventListener('keydown', (e) => {
 (async function boot() {
   startRouter();
   document.documentElement.dataset.theme = state.theme;
+  document.documentElement.dataset.view = state.view;
   await mountView(state.view);
   await loadGraph();
 })();
