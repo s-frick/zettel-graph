@@ -18,6 +18,12 @@ const LABEL_FADE = 0.35;
 const LABEL_PX = 12;
 
 const DIM_ALPHA = 0.15;
+// Smallest hit radius in *screen* pixels. force-graph picks by reading a single
+// pixel out of an off-screen colour buffer, so a node is only as clickable as
+// its painted area is big: a degree-0 node is 3 graph units, which at the
+// default fit zoom is under 4 px. Padding in graph units shrinks with the zoom,
+// so the padding has to be divided back out by globalScale.
+const MIN_HIT_PX = 9;
 const CURVATURE = 0.22;
 
 export function create2dRenderer(container, handlers = {}) {
@@ -113,13 +119,26 @@ export function create2dRenderer(container, handlers = {}) {
     ctx.restore();
   }
 
-  // Pointer picking uses an off-screen colour buffer; paint the same disc, a bit
-  // larger, so small nodes stay grabbable.
-  function paintPointerArea(node, color, ctx) {
+  // Pointer picking uses an off-screen colour buffer; paint the same disc but
+  // never smaller than MIN_HIT_PX on screen, so small and ghost nodes stay
+  // grabbable at every zoom level.
+  function paintPointerArea(node, color, ctx, globalScale) {
+    const r = Math.max(nodeSize(node) + 2, MIN_HIT_PX / (globalScale || 1));
     ctx.beginPath();
-    ctx.arc(node.x, node.y, nodeSize(node) + 2, 0, 2 * Math.PI);
+    ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
     ctx.fillStyle = color;
     ctx.fill();
+  }
+
+  // The colour buffer is only refreshed on an 800 ms throttle, so right after a
+  // zoom or pan it still holds the previous transform and every hit area sits
+  // offset from the circle you can see. Re-setting the accessor makes
+  // force-graph flush that buffer immediately (see its nodePointerAreaPaint
+  // onChange), which is the supported way to force the refresh.
+  let flushTimer = null;
+  function flushPickBuffer() {
+    clearTimeout(flushTimer);
+    flushTimer = setTimeout(() => G.nodePointerAreaPaint(paintPointerArea), 120);
   }
 
   // Links keep force-graph's own drawing (curves + arrows); hover dimming is
@@ -149,7 +168,10 @@ export function create2dRenderer(container, handlers = {}) {
     // Visuals depend on state (hover/selection/search) that changes outside the
     // simulation, so we cannot let force-graph pause its render loop.
     .autoPauseRedraw(false)
-    .onZoom((t) => { zoomK = t.k; })
+    .onZoom((t) => {
+      zoomK = t.k;
+      flushPickBuffer();
+    })
     .onNodeHover((node, prev) => {
       el.classList.toggle('zk-canvas-hover', !!node);
       handlers.onNodeHover?.(node, prev);
@@ -158,6 +180,8 @@ export function create2dRenderer(container, handlers = {}) {
     .onBackgroundClick((ev) => handlers.onBackgroundClick?.(ev));
 
   G.onEngineStop(() => {
+    // Nodes have stopped moving, so the stale buffer can be brought up to date.
+    flushPickBuffer();
     if (!pendingFit) return;
     pendingFit = false;
     G.zoomToFit(400, 60);
@@ -190,6 +214,7 @@ export function create2dRenderer(container, handlers = {}) {
       neighbors = buildNeighbors(g.links);
       applyCurvature(g.links);
       G.graphData(g);
+      flushPickBuffer();
     },
     getData: () => G.graphData(),
 

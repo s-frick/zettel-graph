@@ -4,7 +4,7 @@
 import { state, setState } from '../state.js';
 import { visibleGraph, neighborsWithin } from '../model/graph.js';
 import { createRenderer } from '../renderer/index.js';
-import { canvasBackground } from '../styling.js';
+import { canvasBackground, nodeSize } from '../styling.js';
 
 export function createGraphView() {
   let host = null;
@@ -53,7 +53,10 @@ export function createGraphView() {
       }
     }
     renderer.setData({
-      nodes: g.nodes.map((n) => ({ ...n })),
+      // Biggest first: both the visible canvas and force-graph's pick buffer
+      // paint in array order, so drawing small nodes last keeps them on top and
+      // stops a hub's (deliberately generous) hit area from swallowing them.
+      nodes: g.nodes.map((n) => ({ ...n })).sort((a, b) => nodeSize(b) - nodeSize(a)),
       links: g.links.map((l) => ({ ...l })),
     });
     if (pendingFocus) {
