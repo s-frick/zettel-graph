@@ -23,10 +23,17 @@ let applying = false;
 
 export function applyHashToState() {
   const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+  // Several codecs write into the same nested key (e.g. every facet writes
+  // `filters`), so a flat Object.assign would let the last one win. Merge one
+  // level deep, matching setState's own merge semantics.
   const patch = {};
   for (const c of codecs) {
     const raw = params.get(c.key);
-    if (raw != null) Object.assign(patch, c.write(decodeURIComponent(raw)));
+    if (raw == null) continue;
+    for (const [k, v] of Object.entries(c.write(decodeURIComponent(raw)))) {
+      const isPlain = (o) => o && typeof o === 'object' && !Array.isArray(o) && !(o instanceof Set);
+      patch[k] = isPlain(patch[k]) && isPlain(v) ? { ...patch[k], ...v } : v;
+    }
   }
   if (Object.keys(patch).length) {
     applying = true;

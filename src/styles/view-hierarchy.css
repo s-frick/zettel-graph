@@ -1,1 +1,181 @@
-/* view-hierarchy — owned by the agent implementing this feature. */
+/* view-hierarchy — indented folder tree + sunburst (B2). */
+
+.zk-hierarchy {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  /* Top padding clears the fixed search box / toolbar overlays. */
+  padding: 4.2rem 1rem 1rem;
+  box-sizing: border-box;
+  font-size: 0.82rem;
+}
+
+.zk-h-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.zk-h-seg { display: flex; }
+.zk-h-seg-btn {
+  padding: 0.32rem 0.75rem;
+  font: inherit;
+  color: var(--zk-text);
+  background: var(--zk-bg);
+  border: 1px solid var(--zk-border-soft);
+  cursor: pointer;
+  transition: background var(--zk-transition-fast), color var(--zk-transition-fast);
+}
+.zk-h-seg-btn:first-child { border-radius: var(--zk-radius) 0 0 var(--zk-radius); }
+.zk-h-seg-btn:last-child { border-radius: 0 var(--zk-radius) var(--zk-radius) 0; border-left: 0; }
+.zk-h-seg-btn:hover { background: var(--zk-bg-strong); }
+.zk-h-seg-btn.active { color: var(--zk-accent); border-color: var(--zk-accent); }
+
+.zk-h-stats {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--zk-text-dim);
+}
+
+/* Scroll container — the tree can be hundreds of rows tall. */
+.zk-h-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.zk-h-tree {
+  max-width: 46rem;
+  padding-bottom: 2rem;
+}
+
+.zk-h-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-right: 0.5rem;
+  height: 1.55rem;
+  border-radius: 0.35rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.zk-h-row:hover { background: var(--zk-hover); }
+.zk-h-row.is-selected {
+  background: color-mix(in srgb, var(--zk-accent) 18%, transparent);
+  box-shadow: inset 2px 0 0 var(--zk-accent);
+}
+.zk-h-row.is-ghost { opacity: 0.55; }
+
+.zk-h-caret {
+  width: 0.8rem;
+  flex: none;
+  text-align: center;
+  color: var(--zk-text-dim);
+  font-size: 0.7rem;
+}
+
+.zk-h-swatch,
+.zk-h-dot {
+  flex: none;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+}
+.zk-h-swatch { border-radius: 0.15rem; opacity: 0.8; }
+/* Leaves sit one caret-width in so file names align under their folder. */
+.zk-h-leaf .zk-h-dot { margin-left: 1.3rem; }
+
+.zk-h-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.zk-h-dir .zk-h-name { font-weight: 600; }
+
+.zk-h-type,
+.zk-h-degree,
+.zk-h-count {
+  flex: none;
+  font-size: 0.68rem;
+  color: var(--zk-text-dim);
+  font-family: var(--zk-code-font-family);
+}
+.zk-h-count,
+.zk-h-degree {
+  min-width: 1.6rem;
+  text-align: right;
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.35rem;
+  background: var(--zk-code-bg);
+}
+
+/* The "open in graph" affordance only appears on the row you are pointing at. */
+.zk-h-open {
+  flex: none;
+  visibility: hidden;
+  padding: 0 0.3rem;
+  font: inherit;
+  line-height: 1;
+  color: var(--zk-text-dim);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.zk-h-row:hover .zk-h-open { visibility: visible; }
+.zk-h-open:hover { color: var(--zk-accent); }
+
+/* ---- sunburst ---- */
+
+.zk-h-sun-wrap {
+  position: relative;
+  height: 100%;
+  min-height: 20rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zk-h-sun {
+  width: min(100%, 46rem);
+  max-height: 100%;
+  aspect-ratio: 1;
+}
+
+.zk-h-arc {
+  stroke: var(--zk-canvas-bg);
+  stroke-width: 1;
+  cursor: pointer;
+  transition: fill-opacity var(--zk-transition-fast);
+}
+.zk-h-arc:hover { fill-opacity: 1; }
+
+.zk-h-arc-label {
+  fill: var(--zk-text);
+  font-family: var(--zk-font-family);
+  font-size: 15px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.zk-h-hub {
+  fill: var(--zk-bg);
+  stroke: var(--zk-border-soft);
+  cursor: pointer;
+}
+
+/* Centre readout doubles as the hover tooltip — no floating layer needed. */
+.zk-h-center {
+  position: absolute;
+  max-width: 11rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--zk-text-dim);
+  pointer-events: none;
+  overflow-wrap: anywhere;
+}

@@ -1,1 +1,126 @@
-/* panel-filters — owned by the agent implementing this feature. */
+/* panel-filters — owned by the agent implementing this feature.
+   Top-left, right of the search box (search: left 1rem, width 22rem) so the
+   search results dropdown can expand downward without colliding.
+   Below the detail panel (9998) and the search box (9999). */
+.zk-filters {
+  position: fixed;
+  top: 1rem;
+  left: calc(1rem + 22rem + 0.5rem);
+  max-width: calc(100vw - 2rem);
+  z-index: 9997;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-family: var(--zk-font-family);
+}
+
+.zk-filters-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.7rem;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--zk-text);
+  background: var(--zk-bg);
+  border: 1px solid var(--zk-border-soft);
+  border-radius: var(--zk-radius);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--zk-shadow-soft);
+  cursor: pointer;
+  transition: background var(--zk-transition-fast), border-color var(--zk-transition-fast);
+}
+.zk-filters-toggle:hover { background: var(--zk-bg-strong); }
+.zk-filters.open .zk-filters-toggle { border-color: var(--zk-accent); color: var(--zk-accent); }
+
+/* Badge counts the active restrictions — stays empty (and hidden) at rest. */
+.zk-filters-badge:empty { display: none; }
+.zk-filters-badge {
+  min-width: 1.1rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: var(--zk-accent);
+  color: #1a1a1a;
+  font-size: 0.65rem;
+  line-height: 1.1rem;
+  text-align: center;
+}
+
+/* Collapsed by default — display:none keeps the inputs out of the tab order. */
+.zk-filters-body {
+  display: none;
+  width: 17rem;
+  max-height: calc(100vh - 5rem);
+  overflow-y: auto;
+}
+.zk-filters.open .zk-filters-body { display: block; }
+
+.zk-filters-group + .zk-filters-group {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--zk-border-soft);
+}
+
+.zk-filters-head { display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.3rem; }
+.zk-filters-facet {
+  flex: 1;
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6;
+}
+.zk-filters-group.active .zk-filters-facet { opacity: 1; color: var(--zk-accent); }
+
+.zk-filters-shortcut {
+  padding: 0.1rem 0.35rem;
+  font: inherit;
+  font-size: 0.65rem;
+  color: var(--zk-text-dim);
+  background: transparent;
+  border: 1px solid var(--zk-border-soft);
+  border-radius: 0.35rem;
+  cursor: pointer;
+  transition: color var(--zk-transition-fast), background var(--zk-transition-fast);
+}
+.zk-filters-shortcut:hover { color: var(--zk-text); background: var(--zk-hover); }
+
+.zk-filters-search {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0.3rem;
+  padding: 0.25rem 0.4rem;
+  font: inherit;
+  font-size: 0.72rem;
+  color: var(--zk-text);
+  background: var(--zk-hover);
+  border: 1px solid var(--zk-border-soft);
+  border-radius: 0.35rem;
+  outline: none;
+}
+.zk-filters-search:focus { border-color: var(--zk-accent); }
+
+/* Real bundles have ~20 types and ~100 tags — scroll instead of growing. */
+.zk-filters-list { max-height: 11rem; overflow-y: auto; padding-right: 0.15rem; }
+
+.zk-filters-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.1rem 0;
+  cursor: pointer;
+}
+.zk-filters-row:hover { background: var(--zk-hover); }
+.zk-filters-row input { accent-color: var(--zk-accent); margin: 0; }
+.zk-filters-dot {
+  flex: none;
+  width: 0.6rem; height: 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 50%;
+}
+.zk-filters-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zk-filters-count { font-size: 0.7rem; opacity: 0.5; font-family: var(--zk-code-font-family); }
+
+.zk-filters-flags .zk-check { font-size: 0.78rem; }
+
+/* Narrow viewports: the search box owns the top row, so drop below it. */
+@media (max-width: 60rem) {
+  .zk-filters { left: 1rem; top: 4rem; }
+}

@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 // zettel-graph CLI: visualize an OKF bundle in 3D, with hot-reload.
 //
-//   zettel-graph [dev] [dir]           start dev server (default; hot-reload)
-//   zettel-graph build [dir] -o out    build static site into out/ (default dist/)
-//   zettel-graph graph [dir] -o file   emit graph.json (stdout if no -o)
-//   zettel-graph init [dir]            scaffold an OKF bundle + agent guide
+//   zettel-graph [dev] [dir...]           start dev server (default; hot-reload)
+//   zettel-graph build [dir...] -o out    build static site into out/ (default dist/)
+//   zettel-graph graph [dir...] -o file   emit graph.json (stdout if no -o)
+//   zettel-graph init [dir]               scaffold an OKF bundle + agent guide
 //
-// [dir] defaults to the current directory (init defaults to ./knowledge). The
-// Vite root is pinned to this package so the client app is served from the
-// install location, while the content bundle is whatever directory you point at
-// (exported as OKF_BUNDLE).
+// [dir] defaults to the current directory (init defaults to ./knowledge).
+// Several bundles can be passed at once; their notes then share one graph and
+// cross-bundle relative links resolve into real edges. The Vite root is pinned
+// to this package so the client app is served from the install location, while
+// the content bundles are whatever directories you point at (exported as
+// OKF_BUNDLE, a JSON array so paths with separators/spaces survive).
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import fs from 'node:fs';
@@ -22,21 +24,26 @@ function usage() {
   process.stderr.write(
     `zettel-graph — 3D OKF knowledge-graph visualizer\n\n` +
       `Usage:\n` +
-      `  zettel-graph [dev] [dir]           dev server with hot-reload (default)\n` +
-      `  zettel-graph build [dir] -o out    static site (default: dist/)\n` +
-      `  zettel-graph graph [dir] -o file   emit graph.json (stdout if no -o)\n` +
-      `  zettel-graph init [dir]            scaffold an OKF bundle + agent guide\n\n` +
+      `  zettel-graph [dev] [dir...]           dev server with hot-reload (default)\n` +
+      `  zettel-graph build [dir...] -o out    static site (default: dist/)\n` +
+      `  zettel-graph graph [dir...] -o file   emit graph.json (stdout if no -o)\n` +
+      `  zettel-graph init [dir]               scaffold an OKF bundle + agent guide\n\n` +
       `Arguments:\n` +
-      `  dir    OKF bundle directory (default: current dir; init: ./knowledge)\n` +
-      `  -o     output path (build dir, or graph.json file)\n` +
-      `  -p     dev server port\n` +
-      `  -f     init: overwrite existing files\n` +
-      `  -h     show this help\n`,
+      `  dir        OKF bundle directory (default: current dir; init: ./knowledge).\n` +
+      `             Pass several to merge sibling bundles into one graph; ids then\n` +
+      `             become relative to their common parent (e.g. knowledge/x.md).\n` +
+      `  --exclude  glob or directory to skip, relative to the graph root\n` +
+      `             (repeatable; node_modules/dist/build/vendor/archive are always skipped)\n` +
+      `  -o         output path (build dir, or graph.json file)\n` +
+      `  -p         dev server port\n` +
+      `  -f         init: overwrite existing files\n` +
+      `  -h         show this help\n`,
   );
 }
 
 let cmd = 'dev';
-let dir = null;
+const dirs = [];
+const exclude = [];
 let out = null;
 let port = null;
 let force = false;
@@ -53,21 +60,23 @@ for (let i = 0; i < argv.length; i++) {
     out = argv[++i];
   } else if (a === '-p' || a === '--port') {
     port = Number(argv[++i]);
+  } else if (a === '-x' || a === '--exclude') {
+    exclude.push(argv[++i]);
   } else if (i === 0 && COMMANDS.has(a)) {
     cmd = a;
-  } else if (dir === null) {
-    dir = a;
-  } else {
+  } else if (a.startsWith('-')) {
     console.error(`unexpected argument: ${a}`);
     usage();
     process.exit(1);
+  } else {
+    dirs.push(a);
   }
 }
 
 // init creates the bundle, so it runs before the existence check below.
 if (cmd === 'init') {
   const { runInit } = await import('../src/init.js');
-  const target = dir ?? 'knowledge';
+  const target = dirs[0] ?? 'knowledge';
   const today = new Date().toISOString().slice(0, 10);
   const { root, created, skipped } = runInit({ dir: target, force, today });
   for (const f of created) console.error(`  created  ${f}`);
@@ -80,16 +89,21 @@ if (cmd === 'init') {
   process.exit(0);
 }
 
-const bundle = resolve(process.cwd(), dir ?? '.');
-if (!fs.existsSync(bundle)) {
-  console.error(`bundle directory not found: ${bundle}`);
-  process.exit(1);
+const bundles = (dirs.length ? dirs : ['.']).map((d) => resolve(process.cwd(), d));
+for (const bundle of bundles) {
+  if (!fs.existsSync(bundle)) {
+    console.error(`bundle directory not found: ${bundle}`);
+    process.exit(1);
+  }
 }
-process.env.OKF_BUNDLE = bundle;
+// JSON rather than a path-separator-joined string: bundle paths may contain
+// anything the filesystem allows, including `:` and spaces.
+process.env.OKF_BUNDLE = JSON.stringify(bundles);
+if (exclude.length) process.env.OKF_EXCLUDE = JSON.stringify(exclude);
 
 if (cmd === 'graph') {
   const { buildGraph } = await import('../src/okf.js');
-  const graph = buildGraph(bundle);
+  const graph = buildGraph(bundles, { exclude });
   const json = JSON.stringify(graph, null, 2);
   if (out) {
     fs.writeFileSync(out, json);

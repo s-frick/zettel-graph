@@ -1,1 +1,80 @@
 /* panel-local-graph — owned by the agent implementing this feature. */
+
+/* Bottom-centre: keeps clear of search (top-left), legend (bottom-left),
+   toolbar (top-right) and forces (bottom-right). Below the detail panel's
+   z-index so an overlap never hides the note being read. */
+.local-graph {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22rem;
+  height: 18rem;
+  max-width: 90vw;
+  max-height: 70vh;
+  min-width: 14rem;
+  min-height: 5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  resize: both;
+  z-index: 9997;
+  transition: transform var(--zk-transition-panel);
+}
+
+/* Slide out of the detail panel's way — it opens with any selection. */
+.local-graph.shifted {
+  transform: translateX(calc(-50% - min(var(--zk-detail-width), var(--zk-detail-max-width)) / 2));
+}
+
+.local-graph.hidden { display: none; }
+
+.local-graph.collapsed {
+  height: auto;
+  min-height: 0;
+  resize: none;
+}
+.local-graph.collapsed .local-graph-body { display: none; }
+
+.local-graph-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+.local-graph-header .zk-panel-title { margin-bottom: 0; }
+.local-graph-caret { font-size: 0.7rem; opacity: 0.5; }
+
+.local-graph-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 0.4rem;
+}
+
+/* Positioned box so the renderer's absolutely-inset .zk-canvas fills it. */
+.local-graph-canvas {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  border-radius: 0.5rem;
+  border: 1px solid var(--zk-border-soft);
+  overflow: hidden;
+}
+
+.local-graph-hint {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--zk-text-dim);
+}
+
+.local-graph-controls { flex-shrink: 0; }
+.local-graph-controls .zk-slider { margin: 0.2rem 0; }

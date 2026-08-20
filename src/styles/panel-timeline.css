@@ -1,1 +1,86 @@
-/* panel-timeline — owned by the agent implementing this feature. */
+/* panel-timeline — owned by the agent implementing this feature.
+   Bottom-centre bar. Legend owns bottom-left and forces bottom-right, so the
+   inset keeps ~18rem clear on both sides and the bar centres in what is left. */
+.zk-timeline {
+  position: fixed;
+  bottom: 1rem;
+  left: 18rem;
+  right: 18rem;
+  z-index: 9996;
+  display: flex;
+  /* column-reverse pins the toggle to the bottom edge, the panel grows upward. */
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--zk-font-family);
+  pointer-events: none; /* the gap between toggle and body stays click-through */
+}
+.zk-timeline > * { pointer-events: auto; }
+
+.zk-timeline-toggle {
+  padding: 0.4rem 0.7rem;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--zk-text);
+  background: var(--zk-bg);
+  border: 1px solid var(--zk-border-soft);
+  border-radius: var(--zk-radius);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--zk-shadow-soft);
+  cursor: pointer;
+  transition: background var(--zk-transition-fast), border-color var(--zk-transition-fast);
+}
+.zk-timeline-toggle:hover { background: var(--zk-bg-strong); }
+.zk-timeline.open .zk-timeline-toggle { border-color: var(--zk-accent); color: var(--zk-accent); }
+
+/* Collapsed by default — display:none keeps the controls out of the tab order. */
+.zk-timeline-body { display: none; width: min(34rem, 100%); }
+.zk-timeline.open .zk-timeline-body { display: block; }
+
+/* Cursor is inert while disabled — say so instead of pretending it filters. */
+.zk-timeline.inactive .zk-timeline-body .zk-timeline-chart,
+.zk-timeline.inactive .zk-timeline-body .zk-timeline-controls { opacity: 0.55; }
+
+.zk-timeline-chart { height: 2.6rem; margin-bottom: 0.4rem; }
+.zk-timeline-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.zk-timeline-svg .zk-bar {
+  fill: var(--zk-text);
+  fill-opacity: 0.22;
+  cursor: pointer;
+  transition: fill-opacity var(--zk-transition-fast);
+}
+.zk-timeline-svg .zk-bar.on { fill: var(--zk-accent); fill-opacity: 0.75; }
+.zk-timeline-svg .zk-bar:hover { fill-opacity: 1; }
+
+.zk-timeline-empty { font-size: 0.72rem; opacity: 0.5; padding: 0.8rem 0; text-align: center; }
+
+.zk-timeline-controls { display: flex; align-items: center; gap: 0.6rem; }
+.zk-timeline-range { flex: 1; min-width: 0; accent-color: var(--zk-accent); }
+.zk-timeline-date {
+  font-family: var(--zk-code-font-family);
+  font-size: 0.72rem;
+  opacity: 0.75;
+  min-width: 5.5rem;
+  text-align: right;
+}
+
+.zk-timeline-play {
+  width: 1.9rem;
+  padding: 0.25rem 0;
+  font: inherit;
+  font-size: 0.72rem;
+  color: var(--zk-text);
+  background: transparent;
+  border: 1px solid var(--zk-border-soft);
+  border-radius: 0.4rem;
+  cursor: pointer;
+  transition: color var(--zk-transition-fast), background var(--zk-transition-fast);
+}
+.zk-timeline-play:hover { color: var(--zk-accent); background: var(--zk-hover); }
+
+.zk-timeline-opts { display: flex; gap: 1rem; margin-top: 0.3rem; font-size: 0.72rem; }
+
+/* Narrow viewports: the side panels stack, so reclaim the full width. */
+@media (max-width: 60rem) {
+  .zk-timeline { left: 1rem; right: 1rem; }
+}

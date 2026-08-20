@@ -1,1 +1,50 @@
-/* panel-forces — owned by the agent implementing this feature. */
+/* panel-forces — owned by the agent implementing this feature.
+   Bottom-right corner: search is top-left, legend bottom-left, toolbar top-right.
+   Sits below the detail panel (9998) so a wide note still wins the corner. */
+.zk-forces {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 9996;
+  display: flex;
+  /* column-reverse keeps the toggle pinned to the corner, the panel above it. */
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: 0.4rem;
+  font-family: var(--zk-font-family);
+}
+
+.zk-forces-toggle {
+  padding: 0.4rem 0.7rem;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--zk-text);
+  background: var(--zk-bg);
+  border: 1px solid var(--zk-border-soft);
+  border-radius: var(--zk-radius);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--zk-shadow-soft);
+  cursor: pointer;
+  transition: background var(--zk-transition-fast), border-color var(--zk-transition-fast);
+}
+.zk-forces-toggle:hover { background: var(--zk-bg-strong); }
+.zk-forces.open .zk-forces-toggle { border-color: var(--zk-accent); color: var(--zk-accent); }
+
+/* Collapsed by default — display:none keeps the sliders out of the tab order. */
+.zk-forces-body { display: none; width: 14rem; }
+.zk-forces.open .zk-forces-body { display: block; }
+
+.zk-forces-reset {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  font: inherit;
+  font-size: 0.72rem;
+  color: var(--zk-text-dim);
+  background: transparent;
+  border: 1px solid var(--zk-border-soft);
+  border-radius: 0.4rem;
+  cursor: pointer;
+  transition: color var(--zk-transition-fast), background var(--zk-transition-fast);
+}
+.zk-forces-reset:hover { color: var(--zk-text); background: var(--zk-hover); }

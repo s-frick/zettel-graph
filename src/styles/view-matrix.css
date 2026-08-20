@@ -1,1 +1,49 @@
 /* view-matrix — owned by the agent implementing this feature. */
+
+.zk-matrix { position: absolute; inset: 0; overflow: hidden; }
+
+/* The canvas is content-sized (LABEL_W + n*cell), so the shell scrolls it. */
+.zk-matrix-scroll {
+  position: absolute; inset: 0;
+  overflow: auto;
+  padding: 1rem 1rem 6rem 1rem;
+  background: var(--zk-canvas-bg);
+}
+.zk-matrix-canvas { display: block; cursor: crosshair; }
+.zk-matrix-empty { position: absolute; inset: 0; }
+
+.zk-matrix-controls {
+  position: absolute; left: 1rem; bottom: 1rem;
+  width: 12rem; z-index: 5;
+}
+
+.zk-matrix-seg {
+  display: flex; margin-bottom: 0.5rem;
+  border: 1px solid var(--zk-border-soft); border-radius: var(--zk-radius);
+  overflow: hidden;
+}
+.zk-matrix-segbtn {
+  flex: 1; padding: 0.3rem 0.2rem;
+  font: inherit; font-size: 0.72rem;
+  color: var(--zk-text-dim); background: transparent;
+  border: 0; border-left: 1px solid var(--zk-border-soft);
+  cursor: pointer;
+  transition: background var(--zk-transition-fast), color var(--zk-transition-fast);
+}
+.zk-matrix-segbtn:first-child { border-left: 0; }
+.zk-matrix-segbtn:hover { background: var(--zk-hover); color: var(--zk-text); }
+.zk-matrix-segbtn.active { color: var(--zk-accent); background: var(--zk-hover); }
+
+/* Floating tooltip — the only place column identity is spelled out. */
+.zk-matrix-tip {
+  position: absolute; z-index: 20;
+  max-width: 24rem; pointer-events: none;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.75rem; line-height: 1.35;
+  color: var(--zk-text); background: var(--zk-bg-strong);
+  border: 1px solid var(--zk-border-soft); border-radius: var(--zk-radius);
+  box-shadow: var(--zk-shadow-soft);
+  backdrop-filter: blur(6px);
+}
+.zk-matrix-tip[hidden] { display: none; }
+.zk-matrix-tip-meta { display: block; font-size: 0.68rem; opacity: 0.55; }

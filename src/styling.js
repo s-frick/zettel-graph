@@ -79,7 +79,9 @@ export function nodeColor(node) {
 /** Radius-ish size, scaled by degree so hubs read as hubs. */
 export function nodeSize(node) {
   if (node.ghost) return 1.5;
-  if (node.isTag) return 2.5;
+  // Tag nodes carry their note count as degree — scale them like real hubs but
+  // a touch smaller, so a 20-note tag reads as big without drowning the notes.
+  if (node.isTag) return 2 + Math.sqrt(node.degree || 0) * 1.2;
   return 3 + Math.sqrt(node.degree || 0) * 1.6;
 }
 

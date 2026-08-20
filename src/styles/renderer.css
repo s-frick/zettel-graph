@@ -1,1 +1,20 @@
 /* renderer — owned by the agent implementing this feature. */
+
+/* The canvas fills its host; force-graph appends the <canvas> itself. */
+.zk-canvas-2d {
+  cursor: grab;
+  touch-action: none;
+  background: var(--zk-canvas-bg);
+}
+.zk-canvas-2d:active { cursor: grabbing; }
+/* Toggled from onNodeHover so the cursor tells you a node is clickable. */
+.zk-canvas-2d.zk-canvas-hover,
+.zk-canvas-2d.zk-canvas-hover:active { cursor: pointer; }
+
+.zk-canvas-2d canvas {
+  display: block;
+  outline: none;
+}
+
+/* force-graph ships a built-in tooltip; we draw labels ourselves. */
+.zk-canvas-2d .graph-tooltip { display: none; }

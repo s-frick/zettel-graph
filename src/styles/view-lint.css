@@ -1,1 +1,135 @@
-/* view-lint — owned by the agent implementing this feature. */
+/* view-lint — health / lint dashboard (B1). Tokens come from base.css. */
+
+:root {
+  --zk-sev-error: #f7768e;
+  --zk-sev-warn: #e0af68;
+  --zk-sev-info: #7aa2f7;
+}
+
+/* The view host is absolutely positioned, so the scroll container is here. */
+.zk-lint {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem 4rem;
+  font-family: var(--zk-font-family);
+  color: var(--zk-text);
+}
+
+.zk-lint-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.zk-lint-title { margin: 0; font-size: 1.15rem; font-weight: 600; }
+.zk-lint-subtitle { font-size: 0.78rem; color: var(--zk-text-dim); }
+
+/* Counter row */
+.zk-lint-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+.zk-lint-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 6.5rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--zk-border-soft);
+  border-left: 3px solid var(--zk-sev, var(--zk-border-strong));
+  border-radius: var(--zk-radius);
+  background: var(--zk-bg);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--zk-transition-fast);
+}
+.zk-lint-stat:hover { background: var(--zk-hover); }
+.zk-lint-stat-value { font-size: 1.35rem; font-weight: 600; color: var(--zk-sev, var(--zk-text)); }
+.zk-lint-stat-label { font-size: 0.72rem; color: var(--zk-text-dim); }
+
+/* Cards */
+.zk-lint-cards { display: flex; flex-direction: column; gap: 0.6rem; }
+.zk-lint-card {
+  border: 1px solid var(--zk-border-soft);
+  border-left: 3px solid var(--zk-sev, var(--zk-border-strong));
+  border-radius: var(--zk-radius);
+  background: var(--zk-bg);
+  overflow: hidden;
+}
+.zk-lint-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.zk-lint-card-head:hover { background: var(--zk-hover); }
+.zk-lint-caret { width: 0.9rem; color: var(--zk-text-dim); }
+.zk-lint-card-title { font-weight: 600; }
+.zk-lint-count {
+  margin-left: auto;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: var(--zk-code-bg);
+  color: var(--zk-sev, var(--zk-text));
+  font-family: var(--zk-code-font-family);
+  font-size: 0.75rem;
+}
+
+.zk-lint-card-body { padding: 0 0.8rem 0.7rem; }
+.zk-lint-card-desc { margin: 0 0 0.5rem; font-size: 0.78rem; color: var(--zk-text-dim); }
+.zk-lint-empty { font-size: 0.8rem; color: var(--zk-text-dim); font-style: italic; }
+
+/* Items */
+.zk-lint-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+.zk-lint-item-btn {
+  display: block;
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.zk-lint-item-btn:hover { background: var(--zk-hover); }
+.zk-lint-item-static { padding: 0.35rem 0.5rem; }
+.zk-lint-item-title { display: block; font-size: 0.85rem; }
+.zk-lint-item-id,
+.zk-lint-item-detail {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--zk-text-dim);
+}
+.zk-lint-item-id { font-family: var(--zk-code-font-family); }
+
+/* Ghost findings: the referencing notes are the clickable part. */
+.zk-lint-refs { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.3rem; }
+.zk-lint-ref {
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--zk-border-soft);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--zk-link);
+  font-family: var(--zk-code-font-family);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+.zk-lint-ref:hover { background: var(--zk-hover); }
+
+/* Severity accent — one variable drives border, count badge and stat value. */
+.zk-sev-error { --zk-sev: var(--zk-sev-error); }
+.zk-sev-warn { --zk-sev: var(--zk-sev-warn); }
+.zk-sev-info { --zk-sev: var(--zk-sev-info); }
