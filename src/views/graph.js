@@ -53,9 +53,8 @@ export function createGraphView() {
       }
     }
     renderer.setData({
-      // Biggest first: both the visible canvas and force-graph's pick buffer
-      // paint in array order, so drawing small nodes last keeps them on top and
-      // stops a hub's (deliberately generous) hit area from swallowing them.
+      // Biggest first: the canvas paints in array order, so drawing small nodes
+      // last keeps them visible on top of a hub instead of under it.
       nodes: g.nodes.map((n) => ({ ...n })).sort((a, b) => nodeSize(b) - nodeSize(a)),
       links: g.links.map((l) => ({ ...l })),
     });

@@ -18,12 +18,13 @@ const LABEL_FADE = 0.35;
 const LABEL_PX = 12;
 
 const DIM_ALPHA = 0.15;
-// Smallest hit radius in *screen* pixels. force-graph picks by reading a single
-// pixel out of an off-screen colour buffer, so a node is only as clickable as
-// its painted area is big: a degree-0 node is 3 graph units, which at the
-// default fit zoom is under 4 px. Padding in graph units shrinks with the zoom,
-// so the padding has to be divided back out by globalScale.
-const MIN_HIT_PX = 9;
+// Radius, in *screen* pixels, within which a pointer still counts as being on a
+// node. Bigger than most circles look, which is what makes small and ghost
+// nodes grabbable at every zoom level.
+const HIT_PX = 10;
+// How far the pointer may travel between press and release and still count as a
+// click rather than a pan.
+const CLICK_SLOP_PX = 5;
 const CURVATURE = 0.22;
 
 export function create2dRenderer(container, handlers = {}) {
@@ -119,26 +120,55 @@ export function create2dRenderer(container, handlers = {}) {
     ctx.restore();
   }
 
-  // Pointer picking uses an off-screen colour buffer; paint the same disc but
-  // never smaller than MIN_HIT_PX on screen, so small and ghost nodes stay
-  // grabbable at every zoom level.
-  function paintPointerArea(node, color, ctx, globalScale) {
-    const r = Math.max(nodeSize(node) + 2, MIN_HIT_PX / (globalScale || 1));
-    ctx.beginPath();
-    ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
-    ctx.fillStyle = color;
-    ctx.fill();
+  // --- picking -------------------------------------------------------------
+  //
+  // force-graph identifies the node under the pointer by painting every node in
+  // a unique colour into an off-screen buffer and reading back the single pixel
+  // under the cursor (canvas-color-tracker). That only works when the canvas
+  // hands back exactly the byte values that were written. It does not here:
+  // depending on the display colour profile, Chrome colour-manages the backing
+  // store and getImageData returns values off by one per channel, which breaks
+  // the tracker's checksum and makes lookup() return null. Measured on this
+  // machine, 4 of 7 index colours failed the round trip and 129 of 141 nodes
+  // were unreachable — no hover, no click — while the 3D view (raycasting, no
+  // colour buffer) was fine.
+  //
+  // So we pick ourselves: nearest node in graph space within a screen-space
+  // radius. Exact, independent of the GPU, and forgiving enough that a 3 px dot
+  // is as easy to grab as a hub.
+
+  /** Node under a client-space point, or null. */
+  function hitTest(clientX, clientY) {
+    const rect = el.getBoundingClientRect();
+    const px = clientX - rect.left;
+    const py = clientY - rect.top;
+    if (px < 0 || py < 0 || px > rect.width || py > rect.height) return null;
+    const { x, y } = G.screen2GraphCoords(px, py);
+    const k = zoomK || 1;
+    let best = null;
+    let bestDist = Infinity;
+    for (const node of G.graphData().nodes) {
+      if (node.x == null) continue;
+      const dist = Math.hypot(node.x - x, node.y - y);
+      // Whichever is more generous: the drawn disc plus a little, or a flat
+      // screen-space radius that survives being zoomed out.
+      if (dist > Math.max(nodeSize(node) + 2, HIT_PX / k)) continue;
+      // Nearest centre wins, so a small node sitting on a hub stays selectable.
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = node;
+      }
+    }
+    return best;
   }
 
-  // The colour buffer is only refreshed on an 800 ms throttle, so right after a
-  // zoom or pan it still holds the previous transform and every hit area sits
-  // offset from the circle you can see. Re-setting the accessor makes
-  // force-graph flush that buffer immediately (see its nodePointerAreaPaint
-  // onChange), which is the supported way to force the refresh.
-  let flushTimer = null;
-  function flushPickBuffer() {
-    clearTimeout(flushTimer);
-    flushTimer = setTimeout(() => G.nodePointerAreaPaint(paintPointerArea), 120);
+  let hovered = null;
+  function setHover(node) {
+    if (node === hovered) return;
+    const prev = hovered;
+    hovered = node;
+    el.classList.toggle('zk-canvas-hover', !!node);
+    handlers.onNodeHover?.(node, prev);
   }
 
   // Links keep force-graph's own drawing (curves + arrows); hover dimming is
@@ -158,7 +188,6 @@ export function create2dRenderer(container, handlers = {}) {
     .nodeLabel(() => '')
     .nodeVal(nodeSize)
     .nodeCanvasObject(drawNode)
-    .nodePointerAreaPaint(paintPointerArea)
     .linkColor(dimLinkColor)
     .linkWidth(linkWidth)
     .linkCurvature((l) => l.__curvature || 0)
@@ -168,29 +197,91 @@ export function create2dRenderer(container, handlers = {}) {
     // Visuals depend on state (hover/selection/search) that changes outside the
     // simulation, so we cannot let force-graph pause its render loop.
     .autoPauseRedraw(false)
-    .onZoom((t) => {
-      zoomK = t.k;
-      flushPickBuffer();
-    })
-    .onNodeHover((node, prev) => {
-      el.classList.toggle('zk-canvas-hover', !!node);
-      handlers.onNodeHover?.(node, prev);
-    })
-    .onNodeClick((node, ev) => handlers.onNodeClick?.(node, ev))
-    .onBackgroundClick((ev) => handlers.onBackgroundClick?.(ev));
+    // Hover, click and drag are ours (see "picking" above). Turning the built-in
+    // pointer interaction off also stops force-graph maintaining the off-screen
+    // colour buffer at all, which is a frame-time win on a dense graph.
+    .enablePointerInteraction(false)
+    .enableNodeDrag(false)
+    .onZoom((t) => { zoomK = t.k; });
 
   G.onEngineStop(() => {
-    // Nodes have stopped moving, so the stale buffer can be brought up to date.
-    flushPickBuffer();
     if (!pendingFit) return;
     pendingFit = false;
     G.zoomToFit(400, 60);
   });
   // Touching the viewport yourself cancels a pending fit — nothing should yank
   // the camera away once you have started navigating.
-  for (const ev of ['wheel', 'pointerdown']) {
-    el.addEventListener(ev, () => { pendingFit = false; }, { passive: true });
-  }
+  el.addEventListener('wheel', () => { pendingFit = false; }, { passive: true });
+
+  // --- pointer layer --------------------------------------------------------
+  // One press decides between three gestures: click a node, drag a node, pan the
+  // background. The decision is made on pointerdown so d3-zoom can be told to
+  // keep its hands off before it sees the event — hence the capture phase, as
+  // its own listener sits on the canvas *below* this element.
+  let press = null;
+
+  el.addEventListener('pointerdown', (ev) => {
+    pendingFit = false;
+    if (ev.button !== 0) return;
+    const node = hitTest(ev.clientX, ev.clientY);
+    press = { x: ev.clientX, y: ev.clientY, node, moved: false };
+    if (!node) return;
+    // Panning must not fight a node drag.
+    G.enablePanInteraction(false);
+    // Only capture for a node drag: capturing a background press would retarget
+    // the move events away from the canvas and break d3-zoom's panning.
+    el.setPointerCapture?.(ev.pointerId);
+    press.captured = ev.pointerId;
+  }, { capture: true });
+
+  el.addEventListener('pointermove', (ev) => {
+    if (!press) {
+      setHover(hitTest(ev.clientX, ev.clientY));
+      return;
+    }
+    if (!press.moved && Math.hypot(ev.clientX - press.x, ev.clientY - press.y) > CLICK_SLOP_PX) {
+      press.moved = true;
+      if (press.node) {
+        // Pin the node and keep the simulation warm so neighbours follow along.
+        press.node.fx = press.node.x;
+        press.node.fy = press.node.y;
+        G.d3ReheatSimulation();
+      }
+    }
+    if (!press.moved || !press.node) return;
+    const rect = el.getBoundingClientRect();
+    const p = G.screen2GraphCoords(ev.clientX - rect.left, ev.clientY - rect.top);
+    press.node.fx = press.node.x = p.x;
+    press.node.fy = press.node.y = p.y;
+  });
+
+  const endPress = (ev) => {
+    if (!press) return;
+    const { node, moved, captured } = press;
+    press = null;
+    if (captured != null) el.releasePointerCapture?.(captured);
+    G.enablePanInteraction(true);
+    if (node && moved) {
+      // Release the pin — a dropped node rejoins the layout, as it did before.
+      node.fx = undefined;
+      node.fy = undefined;
+      return;
+    }
+    if (moved) return; // a pan, not a click
+    if (node) handlers.onNodeClick?.(node, ev);
+    else handlers.onBackgroundClick?.(ev);
+  };
+  const cancelPress = () => {
+    if (!press) return;
+    if (press.captured != null) el.releasePointerCapture?.(press.captured);
+    press = null;
+    G.enablePanInteraction(true);
+  };
+  // On window, not on the element: a release outside the canvas must not strand
+  // the pan lock.
+  window.addEventListener('pointerup', endPress);
+  window.addEventListener('pointercancel', cancelPress);
+  el.addEventListener('pointerleave', () => { if (!press) setHover(null); });
 
   const onResize = () => G.width(el.clientWidth).height(el.clientHeight);
   const ro = new ResizeObserver(onResize);
@@ -214,7 +305,7 @@ export function create2dRenderer(container, handlers = {}) {
       neighbors = buildNeighbors(g.links);
       applyCurvature(g.links);
       G.graphData(g);
-      flushPickBuffer();
+      hovered = null;
     },
     getData: () => G.graphData(),
 
@@ -247,6 +338,8 @@ export function create2dRenderer(container, handlers = {}) {
     destroy() {
       ro.disconnect();
       window.removeEventListener('resize', onResize);
+      window.removeEventListener('pointerup', endPress);
+      window.removeEventListener('pointercancel', cancelPress);
       dprQuery.removeEventListener?.('change', onDpr);
       G._destructor?.();
       el.remove();
