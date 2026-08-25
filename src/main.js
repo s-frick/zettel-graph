@@ -8,6 +8,7 @@ import 'highlight.js/styles/github-dark.css';
 
 import { state, setState, subscribe } from './state.js';
 import { buildModel } from './model/graph.js';
+import { loadEmbeddings } from './model/semantic.js';
 import { setAgeRange } from './styling.js';
 import { VIEW_FACTORIES } from './views/index.js';
 import { createPanels } from './panels/index.js';
@@ -58,6 +59,9 @@ async function loadGraph() {
   const stamps = model.nodes.map((n) => n.timestamp && String(n.timestamp).slice(0, 10)).filter(Boolean).sort();
   setAgeRange(stamps[0], stamps[stamps.length - 1]);
   setState({ raw, model });
+  // Fire-and-forget: the first load may take a while (model download +
+  // embedding pass); panels pick it up via the 'semantic' emit when ready.
+  loadEmbeddings();
 }
 
 // ---------- wiring ----------

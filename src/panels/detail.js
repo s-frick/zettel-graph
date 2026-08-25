@@ -3,6 +3,7 @@
 
 import { state, setState, subscribe } from '../state.js';
 import { renderBody, applySyntaxHighlighting, renderMermaid, metaLine } from '../markdown.js';
+import { relatedTo } from '../model/semantic.js';
 import { escapeHtml, el } from '../ui/dom.js';
 
 export function createDetailPanel() {
@@ -28,6 +29,25 @@ export function createDetailPanel() {
     }</h4><ul>${rows}</ul></div>`;
   }
 
+  // Semantically similar notes (cosine over embeddings). Ones not yet linked
+  // in either direction are flagged — they are candidate links for the note.
+  function relatedHtml(n) {
+    const linked = state.model?.adjacency.get(n.id) || new Set();
+    const rows = relatedTo(n.id, 5)
+      .map(({ id, score }) => ({ node: state.model.byId.get(id), score }))
+      .filter((r) => r.node)
+      .map(
+        (r) => `<li>
+          <a href="#" data-goto="${escapeHtml(r.node.id)}">${escapeHtml(r.node.title || r.node.id)}</a>
+          <span class="node-detail-related-score">${Math.round(r.score * 100)}%</span>
+          ${linked.has(r.node.id) ? '' : '<span class="node-detail-related-unlinked" title="semantically similar but not linked">not linked</span>'}
+        </li>`,
+      )
+      .join('');
+    if (!rows) return '';
+    return `<div class="node-detail-backlinks node-detail-related"><h4>Related notes</h4><ul>${rows}</ul></div>`;
+  }
+
   function render() {
     const n = state.selectedId && state.model ? state.model.byId.get(state.selectedId) : null;
     renderToken++;
@@ -50,7 +70,8 @@ export function createDetailPanel() {
       ${resource}
       <hr class="node-detail-divider" />
       <div class="node-detail-body">${n.ghost ? '<em>not yet written</em>' : renderBody(n, 20000)}</div>
-      ${backlinksHtml(n)}`;
+      ${backlinksHtml(n)}
+      ${relatedHtml(n)}`;
     applySyntaxHighlighting(node);
     const token = renderToken;
     renderMermaid(node, token, (t) => t === renderToken);
@@ -79,7 +100,8 @@ export function createDetailPanel() {
 
       subscribe((keys) => {
         // Theme changes must re-render: mermaid bakes its colours into the SVG.
-        if (keys.has('selectedId') || keys.has('model') || keys.has('theme')) render();
+        // 'semantic' fires once embeddings load; adds the related-notes section.
+        if (keys.has('selectedId') || keys.has('model') || keys.has('theme') || keys.has('semantic')) render();
         if (keys.has('zen')) {
           node.classList.toggle('zen', state.zen);
           document.documentElement.toggleAttribute('data-zen', state.zen && !!state.selectedId);

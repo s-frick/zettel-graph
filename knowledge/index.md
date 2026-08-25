@@ -9,6 +9,7 @@ Catalog of this knowledge bundle. One line per note; update on every add or rena
 * [CLI](/components/cli.md) — The zettel-graph command-line entrypoint that dispatches dev/build/graph/init.
 * [init command](/components/init-command.md) — Scaffolds a new OKF bundle with an agent guide, seeded index/log, and a starter note.
 * [Vite config](/components/vite-config.md) — Dev server that builds graph.json on the fly, watches the bundle, and pushes HMR updates.
+* [Semantic search](/components/semantic-search.md) — Local MiniLM embeddings power semantic query search, related-notes suggestions, and hybrid search results.
 
 ## Concepts
 
@@ -30,3 +31,4 @@ Catalog of this knowledge bundle. One line per note; update on every add or rena
 * [Link resolution](/gotchas/link-resolution.md) — How relative vs bundle-relative links resolve, and why plain relative links break when files move.
 * [Reserved-file exclusion](/gotchas/reserved-file-exclusion.md) — index/log/AGENTS/CLAUDE/README markdown files never become nodes, so they cannot hold knowledge.
 * [Frontmatter type required](/gotchas/frontmatter-type-required.md) — type is the only required frontmatter field; it drives node colour, and a missing type falls back to "Unknown".
+* [MiniLM query cosines run low](/gotchas/minilm-query-cosine.md) — Query-to-note cosine similarities on MiniLM are systematically lower than note-to-note ones, so the two use different thresholds.

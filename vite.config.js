@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
 import chokidar from 'chokidar';
 import { buildGraph } from './src/okf.js';
+import { embedNotes, embedQuery } from './src/embeddings.js';
 
 // OKF bundles to visualize. The CLI (bin/cli.js) sets OKF_BUNDLE to a JSON
 // array of the directories passed on the command line — JSON rather than a
@@ -43,6 +44,36 @@ function okfPlugin() {
         }
       });
 
+      // Note vectors for semantic search. Recomputed per request, but the
+      // content-hash cache in src/embeddings.js makes unchanged notes free.
+      server.middlewares.use('/embeddings.json', (_req, res) => {
+        (async () => {
+          const graph = buildGraph(BUNDLES, { exclude: EXCLUDE });
+          const payload = await embedNotes(graph.nodes);
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Cache-Control', 'no-store');
+          res.end(JSON.stringify(payload));
+        })().catch((err) => {
+          res.statusCode = 500;
+          res.end(JSON.stringify({ available: false, error: String(err) }));
+        });
+      });
+
+      // Query embedding for the search box (dev only; static builds fall back
+      // to lexical search — related-notes still work from embeddings.json).
+      server.middlewares.use('/api/embed', (req, res) => {
+        (async () => {
+          const q = new URL(req.url, 'http://x').searchParams.get('q') || '';
+          const vector = q.trim() ? await embedQuery(q) : null;
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Cache-Control', 'no-store');
+          res.end(JSON.stringify({ vector }));
+        })().catch((err) => {
+          res.statusCode = 500;
+          res.end(JSON.stringify({ vector: null, error: String(err) }));
+        });
+      });
+
       server.config.logger.info(`[okf] watching bundle(s): ${BUNDLES.join(', ')}`);
       // chokidar accepts the whole list, so every bundle triggers hot-reload.
       const watcher = chokidar.watch(BUNDLES, { ignoreInitial: true });
@@ -54,9 +85,11 @@ function okfPlugin() {
       server.httpServer?.on('close', () => watcher.close());
     },
     // Production build: emit dist/graph.json next to index.html.
-    generateBundle() {
+    async generateBundle() {
       const graph = buildGraph(BUNDLES, { exclude: EXCLUDE });
       this.emitFile({ type: 'asset', fileName: 'graph.json', source: JSON.stringify(graph) });
+      const embeddings = await embedNotes(graph.nodes);
+      this.emitFile({ type: 'asset', fileName: 'embeddings.json', source: JSON.stringify(embeddings) });
     },
   };
 }

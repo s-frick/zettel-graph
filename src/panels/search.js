@@ -1,7 +1,12 @@
 // Top-left search box. Ranks nodes, dims non-matches via state.search, and
 // flies the graph view to a committed hit.
+//
+// Hybrid ranking: lexical matches render instantly; when embeddings are
+// available (dev server), semantically similar notes that the tokens missed
+// are appended below them, marked with ≈.
 
 import { state, setState, subscribe } from '../state.js';
+import { semanticAvailable, queryScores } from '../model/semantic.js';
 import { typeLabel } from '../markdown.js';
 import { escapeHtml, el } from '../ui/dom.js';
 
@@ -16,6 +21,13 @@ export function createSearchPanel({ onGoto }) {
   const results = box.querySelector('.search-results');
   let hits = [];
   let activeIndex = -1;
+  let semIds = new Set(); // ids appended by the semantic pass (render badge)
+  let semTimer = null;
+  let semToken = 0;
+  // Query↔note cosines run lower than note↔note ones on MiniLM; 0.25 keeps
+  // paraphrased queries ("make page updates faster" → hot-reload) matching.
+  const SEM_MIN_SCORE = 0.25;
+  const SEM_MAX_EXTRA = 10;
 
   const haystack = (n) =>
     [n.title, n.id, typeLabel(n), (n.tags || []).join(' '), n.summary, n.raw]
@@ -42,6 +54,7 @@ export function createSearchPanel({ onGoto }) {
   function run(query) {
     const tokens = (query || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
     if (!tokens.length || !state.model) return clear();
+    semIds = new Set();
     hits = state.model.nodes
       .map((n) => ({ n, s: score(n, tokens) }))
       .filter((x) => x.s > 0)
@@ -50,11 +63,40 @@ export function createSearchPanel({ onGoto }) {
     activeIndex = hits.length ? 0 : -1;
     setState({ search: { active: true, query, matchIds: new Set(hits.map((n) => n.id)) } });
     render();
+    scheduleSemantic(query.trim());
+  }
+
+  // Debounced so we embed the settled query, not every keystroke.
+  function scheduleSemantic(query) {
+    clearTimeout(semTimer);
+    if (!semanticAvailable()) return;
+    semTimer = setTimeout(() => runSemantic(query), 250);
+  }
+
+  async function runSemantic(query) {
+    const token = ++semToken;
+    const scores = await queryScores(query);
+    // Stale response, or the query was cleared/changed meanwhile: drop it.
+    if (!scores || token !== semToken || !state.search.active) return;
+    const have = new Set(hits.map((n) => n.id));
+    const extra = state.model.nodes
+      .filter((n) => !n.ghost && !have.has(n.id) && (scores.get(n.id) || 0) >= SEM_MIN_SCORE)
+      .sort((a, b) => scores.get(b.id) - scores.get(a.id))
+      .slice(0, SEM_MAX_EXTRA);
+    if (!extra.length) return;
+    semIds = new Set(extra.map((n) => n.id));
+    if (activeIndex === -1) activeIndex = 0;
+    hits = [...hits, ...extra];
+    setState({ search: { matchIds: new Set(hits.map((n) => n.id)) } });
+    render();
   }
 
   function clear() {
     hits = [];
     activeIndex = -1;
+    semIds = new Set();
+    semToken++;
+    clearTimeout(semTimer);
     setState({ search: { active: false, query: '', matchIds: new Set() } });
     render();
   }
@@ -72,7 +114,7 @@ export function createSearchPanel({ onGoto }) {
     }
     const rows = hits.slice(0, MAX_ROWS).map((n, i) =>
       `<div class="search-row${i === activeIndex ? ' active' : ''}" data-id="${escapeHtml(n.id)}">
-         <span class="search-row-title">${escapeHtml(n.title || n.id)}</span>
+         <span class="search-row-title">${semIds.has(n.id) ? '<span class="search-row-sem" title="semantic match">≈</span> ' : ''}${escapeHtml(n.title || n.id)}</span>
          <span class="search-row-type">${escapeHtml(typeLabel(n))}</span>
        </div>`).join('');
     const more = hits.length > MAX_ROWS ? `<div class="search-empty">+${hits.length - MAX_ROWS} more…</div>` : '';
@@ -118,8 +160,10 @@ export function createSearchPanel({ onGoto }) {
           input.select();
         }
       });
-      // Re-run after hot-reload so highlights survive fresh data.
-      subscribe((keys) => { if (keys.has('model') && state.search.active) run(input.value); });
+      // Re-run after hot-reload (fresh data) or once embeddings finish loading.
+      subscribe((keys) => {
+        if ((keys.has('model') || keys.has('semantic')) && state.search.active) run(input.value);
+      });
     },
   };
 }

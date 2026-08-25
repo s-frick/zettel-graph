@@ -353,3 +353,26 @@
 .node-detail-backlinks ul { margin: 0; padding-left: 1.1rem; font-size: 0.85rem; }
 .node-detail-backlinks a { color: var(--zk-link); text-decoration: none; }
 .node-detail-backlinks a:hover { text-decoration: underline; }
+
+/* ---- semantic search & related notes ---- */
+.search-row-sem {
+  color: var(--zk-accent);
+  font-weight: 600;
+}
+.node-detail-related li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+.node-detail-related-score {
+  color: var(--zk-text-dim);
+  font-size: 0.75rem;
+}
+.node-detail-related-unlinked {
+  color: var(--zk-accent);
+  font-size: 0.7rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0 0.4rem;
+  white-space: nowrap;
+}
