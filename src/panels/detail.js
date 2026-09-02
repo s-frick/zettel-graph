@@ -4,6 +4,7 @@
 import { state, setState, subscribe } from '../state.js';
 import { renderBody, applySyntaxHighlighting, renderMermaid, metaLine } from '../markdown.js';
 import { relatedTo } from '../model/semantic.js';
+import { wireInternalLinks } from '../internal-links.js';
 import { escapeHtml, el } from '../ui/dom.js';
 
 export function createDetailPanel() {
@@ -72,6 +73,7 @@ export function createDetailPanel() {
       <div class="node-detail-body">${n.ghost ? '<em>not yet written</em>' : renderBody(n, 20000)}</div>
       ${backlinksHtml(n)}
       ${relatedHtml(n)}`;
+    wireInternalLinks(node, n.id, state.model);
     applySyntaxHighlighting(node);
     const token = renderToken;
     renderMermaid(node, token, (t) => t === renderToken);

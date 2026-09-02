@@ -32,6 +32,7 @@
     "LICENSE"
   ],
   "scripts": {
+    "test": "node --test",
     "dev": "node bin/cli.js dev examples",
     "build": "node bin/cli.js build examples",
     "graph": "node bin/cli.js graph examples"
